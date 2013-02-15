@@ -1,17 +1,9 @@
-# Object files
-*.o
+# Keil
+*.plg
+*.lnp
+*.LST
+*.OBJ
+*.M51
 
-# Libraries
-*.lib
-*.a
-
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
-
-# Executables
-*.exe
-*.out
-*.app
+# Project
+CpE314-Project
