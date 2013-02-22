@@ -19,6 +19,6 @@ void main(void)
         amberLED = flashState;
         greenLED = flashState;
         flashState = ~flashState;
-        for(count=0; count<15000; count++); //delay
+        for(count=0; count<25000; count++); //delay
 	}
 }
