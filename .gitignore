@@ -4,6 +4,7 @@
 *.LST
 *.OBJ
 *.M51
+*.hex
 
 # Project
 CpE314-Project
