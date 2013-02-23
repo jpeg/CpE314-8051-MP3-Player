@@ -5,6 +5,8 @@
 *.OBJ
 *.M51
 *.hex
+*.uvgui.*
+*.uvopt
 
 # Project
 CpE314-Project
