@@ -8,6 +8,8 @@
 *.Opt
 *.Uv2
 *.Bak
+*.uvgui.*
+*.uvopt
 
 # Project
 CpE314-Project
