@@ -6,19 +6,14 @@
 
 #include "main.h"
 #include "ports.h"
+#include "rtos.h"
 
 void main(void)
 {
-    bit flashState = 0;
-    uint16 count;
+    os_init();
     
 	while(1)
 	{
-        redLED = flashState;
-        yellowLED = flashState;
-        amberLED = flashState;
-        greenLED = flashState;
-        flashState = ~flashState;
-        for(count=0; count<25000; count++); //delay
+		//TODO sleep
 	}
 }

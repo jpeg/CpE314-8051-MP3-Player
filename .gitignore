@@ -5,6 +5,9 @@
 *.OBJ
 *.M51
 *.hex
+*.Opt
+*.Uv2
+*.Bak
 
 # Project
 CpE314-Project
