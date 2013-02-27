@@ -8,12 +8,23 @@
 #include "ports.h"
 #include "rtos.h"
 
+// Tasks
+void blinkLED(void);
+
 void main(void)
 {
-    os_init();
+    //Initialize
+    rtos_init();
+    rtos_task(&blinkLED, 1000);
     
-	while(1)
-	{
-		//TODO sleep
-	}
+    // Run
+	rtos_spin();
+}
+
+void blinkLED(void)
+{
+    static bit state = 1;
+    
+    greenLED = state;
+    state = ~state;
 }

@@ -9,14 +9,26 @@
 #ifndef RTOS_H
 #define RTOS_H
 
+#include "main.h"
+
+#define RTOS_MAX_NUM_TASKS (3)
+typedef void (*task_type)(void);
+
+static uint8 rtos_numTasks;
+static task_type rtos_tasks[RTOS_MAX_NUM_TASKS];
+static uint16 rtos_taskCounts[RTOS_MAX_NUM_TASKS];
+static uint16 rtos_taskCounters[RTOS_MAX_NUM_TASKS];
+
 // Initalize the RT OS
-void os_init(void);
+void rtos_init(void);
 
-// Add an application to be run
-//void os_app(???);
+// Add an application to be run, msec sets how many milliseconds between runs
+void rtos_task(task_type task, uint16 msec);
 
-// Runs applications each tick
-void os_tick_ISR(void);
+// Run the background print to serial task
+void rtos_spin();
+
+// Runs applications each tick, uses timer2
+void rtos_tick_ISR(void);
 
 #endif //RTOS_H
-
