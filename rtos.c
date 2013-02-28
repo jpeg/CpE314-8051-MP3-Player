@@ -41,6 +41,35 @@ void rtos_task(task_type task, uint16 msec)
     rtos_numTasks++;
 }
 
+void rtos_rate(task_type task, uint16 msec)
+{
+    uint8 currentTask;
+    
+    for(currentTask=0; currentTask<rtos_numTasks; ++currentTask)
+    {
+        if(rtos_tasks[currentTask] == task)
+        {
+            rtos_taskCounts[currentTask] = msec;
+            if(rtos_taskCounters[currentTask] > rtos_taskCounts[currentTask])
+                rtos_taskCounters[currentTask] = msec;
+            break;
+        }
+    }
+}
+
+uint16 rtos_getRate(task_type task)
+{
+    uint8 currentTask;
+    
+    for(currentTask=0; currentTask<rtos_numTasks; ++currentTask)
+    {
+        if(rtos_tasks[currentTask] == task)
+            return rtos_taskCounts[currentTask];
+    }
+    
+    return 0;
+}
+
 void rtos_spin()
 {
     bit spin = 1;
