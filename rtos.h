@@ -10,14 +10,15 @@
 #define RTOS_H
 
 #include "main.h"
+#include "uart.h"
 
 #define RTOS_MAX_NUM_TASKS (3)
 typedef void (*task_type)(void);
 
 static uint8 rtos_numTasks;
-static task_type rtos_tasks[RTOS_MAX_NUM_TASKS];
-static uint16 rtos_taskCounts[RTOS_MAX_NUM_TASKS];
-static uint16 rtos_taskCounters[RTOS_MAX_NUM_TASKS];
+static idata task_type rtos_tasks[RTOS_MAX_NUM_TASKS];
+static idata uint16 rtos_taskCounts[RTOS_MAX_NUM_TASKS];
+static idata uint16 rtos_taskCounters[RTOS_MAX_NUM_TASKS];
 
 // Initalize the RT OS
 void rtos_init(void);
@@ -36,5 +37,14 @@ void rtos_spin();
 
 // Runs applications each tick, uses timer2
 void rtos_tick_ISR(void);
+
+// Adds a character array to the print buffer
+void rtos_print(char* string, uint8 length);
+
+// Prints array of 8 bytes
+void rtos_hex(uint8* bytes);
+
+// Prints 8 bytes around given location
+void rtos_dump(uint8* ptr, uint16 numBytes);
 
 #endif //RTOS_H
