@@ -222,6 +222,6 @@ void task_readSwitches(void)
 
 void task_dumpString(void)
 {
-  uint8 string[8] = "Testing!";
-  rtos_dump(string, 8);
+  uint8 string[16] = "Testing! Works??";
+  rtos_dump(string, 16);
 }

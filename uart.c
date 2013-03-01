@@ -33,7 +33,7 @@ void uart_print(uint8 string[], uint8 length)
   for(byte=0; byte<length; ++byte)
     uart_buffer[byte] = string[byte];
   uart_bufferLength = length;
-  
+
   // Transmit first byte
   SBUF = uart_buffer[0];
   uart_bufferPos = 1;

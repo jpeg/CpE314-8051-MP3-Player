@@ -106,7 +106,6 @@ void rtos_tick_ISR(void) interrupt 5 using 3
 void rtos_hex(uint8 bytes[])
 {
   uint8 byte;
-  uint8 temp;
   uint8* ptr;
   uint8 pos = 0;
   uint8 string[34]; //8*2 for bytes, 8 for spaces, 8 for ASCII
@@ -115,8 +114,12 @@ void rtos_hex(uint8 bytes[])
   for(byte=0; byte<8; ++byte)
   {
     *ptr = (bytes[byte] >> 4) | 0x30;
+    if(*ptr > 0x39)
+      *ptr += 0x09;
     ptr++;
-    *ptr = (bytes[byte] & 0x0F);
+    *ptr = (bytes[byte] & 0x0F) | 0x30;
+    if(*ptr > 0x39)
+      *ptr += 0x09;
     ptr++;
     *ptr = 0x20;
     ptr++;
