@@ -22,7 +22,7 @@ void uart_init(void)
   EA = 1;
 }
 
-void uart_print(uint8* string, uint8 length)
+void uart_print(uint8 string[], uint8 length)
 {
   uint8 byte;
   

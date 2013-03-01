@@ -103,33 +103,48 @@ void rtos_tick_ISR(void) interrupt 5 using 3
   }
 }
 
-void rtos_hex(uint8* bytes)
+void rtos_hex(uint8 bytes[])
 {
   uint8 byte;
+  uint8 temp;
+  uint8* ptr;
   uint8 pos = 0;
-  uint8 string[33]; //8*2 for bytes, 8 for spaces, 8 for ASCII
+  uint8 string[34]; //8*2 for bytes, 8 for spaces, 8 for ASCII
+  ptr = &string[0];
   
   for(byte=0; byte<8; ++byte)
   {
-    string[pos] = (bytes[byte] & 0x0F) | 0x30;
-    pos++;
-    string[pos] = (bytes[byte] >> 4) | 0x30;
-    pos++;
-    string[pos] = 0x20;
-    pos++;
+    *ptr = (bytes[byte] >> 4) | 0x30;
+    ptr++;
+    *ptr = (bytes[byte] & 0x0F);
+    ptr++;
+    *ptr = 0x20;
+    ptr++;
   }
   
   for(byte=0; byte<8; ++byte)
   {
     if(bytes[byte] < 0x20 || bytes[byte] > 0x7E)
-      string[pos] = '.';
+      *ptr = '.';
     else
-      string[pos] = bytes[byte];
-    pos++;
+    {
+      *ptr = bytes[byte];
+    }
+    ptr++;
   }
-  string[pos] = 0x0D; //carriage return
+  *ptr = '\n';
+  ptr++;
+  *ptr = '\r';
   
-  uart_print(string, 33);
+  ptr = &string[0];
+  for(pos=0; pos<34; ++pos)
+  {
+    SBUF = *ptr;
+    ptr++;
+    while(TI == 0);
+    TI = 0;
+  }
+  //uart_print(&string[0], 34);
 }
 
 void rtos_dump(uint8* ptr, uint16 numBytes)
@@ -137,6 +152,7 @@ void rtos_dump(uint8* ptr, uint16 numBytes)
   uint16 byte;
   uint32 temp = ptr;
   ptr = ptr - (temp % 8); //adjust address to 8 byte boundary
+  numBytes += (temp % 8);
   
   for(byte=0; byte<numBytes; byte+=8)
   {

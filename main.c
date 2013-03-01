@@ -23,8 +23,8 @@ static uint8 switchStates[4] = { WAIT_PRESS, WAIT_PRESS, WAIT_PRESS, WAIT_PRESS 
 void main(void)
 {
   // X2 Mode
-  CKCON0 = 0x7F;
-  CKCON1 = 0x01;
+  CKCON0 = 0x01;
+  CKCON1 = 0x00;
   
   // Initialize
   rtos_init();
@@ -222,6 +222,6 @@ void task_readSwitches(void)
 
 void task_dumpString(void)
 {
-  uint8 string[16] = "Testing!        ";
-  rtos_dump(string, 16);
+  uint8 string[8] = "Testing!";
+  rtos_dump(string, 8);
 }
