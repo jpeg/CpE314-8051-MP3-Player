@@ -153,7 +153,7 @@ void rtos_hex(uint8 bytes[])
 void rtos_dump(uint8* ptr, uint16 numBytes)
 {
   uint16 byte;
-  uint32 temp = ptr;
+  uint32 temp = (uint32)ptr;
   ptr = ptr - (temp % 8); //adjust address to 8 byte boundary
   numBytes += (temp % 8);
   
