@@ -22,16 +22,17 @@ void uart_init(void)
   EA = 1;
 }
 
-void uart_print(uint8 string[], uint8 length)
+void uart_print(uint8* string, uint8 length)
 {
-  uint8 byte;
+  //uint8 byte;
   
   if(uart_bufferPos != 0)
     return; //already transmitting
   
   // Copy string to buffer so that memory won't be overwritten
-  for(byte=0; byte<length; ++byte)
-    uart_buffer[byte] = string[byte];
+  //for(byte=0; byte<length; ++byte)
+  //  uart_buffer[byte] = string[byte];
+  uart_buffer = string;
   uart_bufferLength = length;
 
   // Transmit first byte

@@ -9,13 +9,10 @@
 #include "rtos.h"
 
 // Tasks
-void task_blinkLED(void);
 void task_readSwitches(void);
 void task_dumpString(void);
 
 // Task variables
-static enum Colors { RED, YELLOW, AMBER, GREEN };
-static uint8 activeLED = 0;
 static enum SwitchStates { WAIT_PRESS, PRESS_DETECTED, PRESSED, WAIT_RELEASE, 
                RELEASE_DETECTED };
 static uint8 switchStates[4] = { WAIT_PRESS, WAIT_PRESS, WAIT_PRESS, WAIT_PRESS };
@@ -27,44 +24,18 @@ void main(void)
   CKCON1 = 0x00;
   
   // Initialize
+  yellowLED=1;
   rtos_init();
-  rtos_task(&task_blinkLED, 1000);
   rtos_task(&task_readSwitches, 1);
   rtos_task(&task_dumpString, 2000);
+  yellowLED=0;
   
   // Run
 	rtos_spin();
 }
 
-void task_blinkLED(void)
-{
-  static bit state = 1;
-  
-  switch(activeLED)
-  {
-  case RED:
-    redLED = state;
-    break;
-  case YELLOW:
-    yellowLED = state;
-    break;
-  case AMBER:
-    amberLED = state;
-    break;
-  case GREEN:
-    greenLED = state;
-    break;
-  default:
-    activeLED = redLED;
-    break;
-  }
-  state = ~state;
-}
-
 void task_readSwitches(void)
 {
-  uint16 currentRate = rtos_getRate(&task_blinkLED);
-  
   // Switch1 debounce
   switch(switchStates[0])
   {
@@ -79,12 +50,7 @@ void task_readSwitches(void)
       switchStates[0] = WAIT_PRESS;
     break;
   case PRESSED:
-    // Rate down
-    if(currentRate > 100)
-    {
-      currentRate -= 100;
-      rtos_rate(&task_blinkLED, currentRate);
-    }
+    // Do something
     switchStates[0] = WAIT_RELEASE;
     break;
   case WAIT_RELEASE:
@@ -116,16 +82,8 @@ void task_readSwitches(void)
       switchStates[1] = WAIT_PRESS;
     break;
   case PRESSED:
-    // LED down
-    if(activeLED == RED)
-      activeLED = GREEN;
-    else
-      activeLED--;
+    // Do something
     switchStates[1] = WAIT_RELEASE;
-    redLED = 1;
-    yellowLED = 1;
-    amberLED = 1;
-    greenLED = 1;
     break;
   case WAIT_RELEASE:
     if(switch2 == 1)
@@ -156,12 +114,7 @@ void task_readSwitches(void)
       switchStates[2] = WAIT_PRESS;
     break;
   case PRESSED:
-    // Rate up
-    if(currentRate < 2000)
-    {
-      currentRate += 100;
-      rtos_rate(&task_blinkLED, currentRate);
-    }
+    // Do something
     switchStates[2] = WAIT_RELEASE;
     break;
   case WAIT_RELEASE:
@@ -193,16 +146,8 @@ void task_readSwitches(void)
       switchStates[3] = WAIT_PRESS;
     break;
   case PRESSED:
-    // LED up
-    if(activeLED == GREEN)
-      activeLED = RED;
-    else
-      activeLED++;
+    // Do something
     switchStates[3] = WAIT_RELEASE;
-    redLED = 1;
-    yellowLED = 1;
-    amberLED = 1;
-    greenLED = 1;
     break;
   case WAIT_RELEASE:
     if(switch4 == 1)
@@ -223,5 +168,5 @@ void task_readSwitches(void)
 void task_dumpString(void)
 {
   uint8 string[16] = "Testing! Works??";
-  rtos_dump(string, 16);
+  uart_print(string, 16);
 }

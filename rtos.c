@@ -34,6 +34,7 @@ void rtos_init(void)
   rtos_numTasks = 0;
   
   uart_init();
+  spi_sdcard_init();
 }
 
 void rtos_task(task_type task, uint16 msec)
@@ -47,6 +48,7 @@ void rtos_task(task_type task, uint16 msec)
   rtos_numTasks++;
 }
 
+/* Disabled to reduce mem usage
 void rtos_rate(task_type task, uint16 msec)
 {
   uint8 currentTask;
@@ -74,7 +76,7 @@ uint16 rtos_getRate(task_type task)
   }
   
   return 0;
-}
+}*/
 
 void rtos_spin()
 {
@@ -91,6 +93,7 @@ void rtos_tick_ISR(void) interrupt 5 using 3
   uint8 currentTask;
   
 	TF2 = 0;
+  redLED = 0;
 
   // Run all tasks
 	for(currentTask=0; currentTask<rtos_numTasks; ++currentTask)
@@ -101,9 +104,11 @@ void rtos_tick_ISR(void) interrupt 5 using 3
       rtos_taskCounters[currentTask] = rtos_taskCounts[currentTask];
     }
   }
+  
+  redLED = 1;
 }
 
-void rtos_hex(uint8 bytes[])
+/*void rtos_hex(uint8 bytes[])
 {
   uint8 byte;
   uint8* ptr;
@@ -139,15 +144,15 @@ void rtos_hex(uint8 bytes[])
   ptr++;
   *ptr = '\r';
   
-  ptr = &string[0];
+  /*ptr = &string[0];
   for(pos=0; pos<34; ++pos)
   {
     SBUF = *ptr;
     ptr++;
     while(TI == 0);
     TI = 0;
-  }
-  //uart_print(&string[0], 34);
+  }*
+  uart_print(&string[0], 34);
 }
 
 void rtos_dump(uint8* ptr, uint16 numBytes)
@@ -161,4 +166,4 @@ void rtos_dump(uint8* ptr, uint16 numBytes)
   {
     rtos_hex(ptr+byte);
   }
-}
+}*/

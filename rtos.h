@@ -10,9 +10,11 @@
 #define RTOS_H
 
 #include "main.h"
+#include "ports.h"
 #include "uart.h"
+#include "spi_sdcard.h"
 
-#define RTOS_MAX_NUM_TASKS (3)
+#define RTOS_MAX_NUM_TASKS (2)
 typedef void (*task_type)(void);
 
 static uint8 rtos_numTasks;
@@ -27,10 +29,10 @@ void rtos_init(void);
 void rtos_task(task_type task, uint16 msec);
 
 // Changes the rate at which a task runs
-void rtos_rate(task_type task, uint16 msec);
+//void rtos_rate(task_type task, uint16 msec);
 
 // Gets the current rate for a task
-uint16 rtos_getRate(task_type task);
+//uint16 rtos_getRate(task_type task);
 
 // Run the background print to serial task
 void rtos_spin();
@@ -39,12 +41,12 @@ void rtos_spin();
 void rtos_tick_ISR(void);
 
 // Adds a character array to the print buffer
-void rtos_print(char string[], uint8 length);
+//void rtos_print(char string[], uint8 length);
 
 // Prints array of 8 bytes
-void rtos_hex(uint8 bytes[]);
+//void rtos_hex(uint8 bytes[]);
 
 // Prints 8 bytes around given location
-void rtos_dump(uint8* ptr, uint16 numBytes);
+//void rtos_dump(uint8* ptr, uint16 numBytes);
 
 #endif //RTOS_H

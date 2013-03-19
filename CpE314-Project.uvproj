@@ -365,6 +365,11 @@
               <FileType>1</FileType>
               <FilePath>.\uart.c</FilePath>
             </File>
+            <File>
+              <FileName>spi_sdcard.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\spi_sdcard.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
