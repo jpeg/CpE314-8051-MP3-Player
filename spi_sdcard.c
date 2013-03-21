@@ -8,23 +8,37 @@
 
 void spi_sdcard_init(void)
 {
-  SPCON = 0x5D;
+  uint8 i, response[5];
+  bit error = 0;
+  
+  SPCON = 0x73;
+  
+  // Send 72 clock pulses
+  nCS = 1;
+  for(i=0; i<71; ++i)
+  {
+    SPDAT = 0xFF;
+    while((SPSTA & 0x80) != 0x80);
+  }
   
   // Send CMD0
   spi_sdcard_command(0, 0);
+  error = spi_sdcard_response(1, response);
+  
+  if(error)
+    redLED = 0;
 }
 
 void spi_sdcard_command(uint8 cmd, uint32 arg)
 {
   uint8 checkSum = 0x01;
-  static bit first = 0;
   
   greenLED = 0;
   
   // Checksum
   if(cmd == 0)
   {
-    checkSum = 0x9A;
+    checkSum = 0x95;
     arg = (0UL);
   }
   
@@ -32,10 +46,6 @@ void spi_sdcard_command(uint8 cmd, uint32 arg)
   cmd |= 0x40;
   
   nCS = 0;
-  if(first)
-    while((SPSTA & 0x80) != 0x80);
-  else
-    first = 1;
   SPDAT = cmd;
   while((SPSTA & 0x80) != 0x80);
   SPDAT = arg >> 24;
@@ -47,7 +57,7 @@ void spi_sdcard_command(uint8 cmd, uint32 arg)
   SPDAT = arg & 0xFFUL;
   while((SPSTA & 0x80) != 0x80);
   SPDAT = checkSum;
-  nCS = 1;
+  while((SPSTA & 0x80) != 0x80);
   
   greenLED = 1;
 }
@@ -60,7 +70,8 @@ uint8 spi_sdcard_response(uint8 numBytes, uint8* buffer)
   
   current = buffer;
   
-  while((SPSTA & 0x80) != 0x80);
+  amberLED = 0;
+  
   do
   {
     SPDAT = 0xFF;
@@ -80,15 +91,18 @@ uint8 spi_sdcard_response(uint8 numBytes, uint8* buffer)
       {
         SPSTA = 0xFF;
         while((SPSTA & 0x80) != 0x80);
-        in = SPDAT;
+        *current = SPDAT;
+        current++;
       }
     }
-    else
+  }
+  else
       error = 1;
     
-    SPDAT = 0xFF;
-    while((SPSTA & 0x80) != 0x80);
-  }
+  SPDAT = 0xFF;
+  
+  nCS = 1;
+  amberLED = 1;
   
   return error;
 }

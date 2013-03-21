@@ -94,13 +94,6 @@ void rtos_spin()
   bit input;
   bit currentXRam = 1;
   
-  uint16 j;
-  for(j=0; j<512; ++j)
-  {
-    rtos_sdBuffer[0][j] = (uint8)j;
-    rtos_sdBuffer[1][j] = (uint8)(511 - j);
-  }
-  
   while(spin)
   {
     uart_print("Enter block hex: ", 17);
@@ -123,7 +116,9 @@ void rtos_spin()
         uart_print("\n", 1);
       }
       else if(byte == 0x08) //backspace
+      {
         block = block >> 4;
+      }
       else if(byte >= 0x30 && byte <= 0x39) //number
       {
         byte &= 0x0F;
@@ -147,8 +142,6 @@ void rtos_spin()
       }
     }
     
-    
-    uart_hex32(block);uart_print("\n\r", 2);
     // Dump block
     currentXRam = ~currentXRam;
     //TODO copy block from SD card
@@ -161,7 +154,6 @@ void rtos_tick_ISR(void) interrupt 5 using 3
   uint8 currentTask;
   
 	TF2 = 0;
-  redLED = 0;
 
   // Run all tasks
 	for(currentTask=0; currentTask<rtos_numTasks; ++currentTask)
@@ -172,6 +164,4 @@ void rtos_tick_ISR(void) interrupt 5 using 3
       rtos_taskCounters[currentTask] = rtos_taskCounts[currentTask];
     }
   }
-  
-  redLED = 1;
 }
