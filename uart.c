@@ -24,40 +24,87 @@ void uart_init(void)
 
 void uart_print(uint8* string, uint8 length)
 {
-  //uint8 byte;
+  uint8 i;
   
-  if(uart_bufferPos != 0)
-    return; //already transmitting
-  
-  // Copy string to buffer so that memory won't be overwritten
-  //for(byte=0; byte<length; ++byte)
-  //  uart_buffer[byte] = string[byte];
-  uart_buffer = string;
-  uart_bufferLength = length;
-
-  // Transmit first byte
-  SBUF = uart_buffer[0];
-  uart_bufferPos = 1;
+  for(i=0; i<length; ++i)
+  {
+    SBUF = string[i];
+    while(!TI);
+    TI = 0;
+  }
 }
 
-void uart_ISR(void) interrupt 4 using 2
+void uart_hex8(uint8 c)
 {
-  if(TI)
+  uint8 result[3];
+  uint8 i;
+  
+  result[0] = c >> 4;
+  result[1] = c & 0x0F;
+  
+  for(i=0; i<2; ++i)
   {
-    // Transmitted
-    TI = 0;
-    
-    if(uart_bufferPos < uart_bufferLength)
-    {
-      SBUF = uart_buffer[uart_bufferPos];
-      uart_bufferPos++;
-    }
+    if(result[i] < 0x0A)
+      result[i] += 48;
     else
-      uart_bufferPos = 0;
+      result[i] += 55;
   }
-  else if(RI)
+  
+  result[2] = ' ';
+  
+  uart_print(result, 3);
+}
+
+void uart_hex32(uint32 byte)
+{
+  uint8 result[9];
+  uint8 i;
+  
+  result[0] = (uint8)(byte >> 28) & 0x0F;
+  result[1] = (uint8)(byte >> 24) & 0x0F;
+  result[2] = (uint8)(byte >> 20) & 0x0F;
+  result[3] = (uint8)(byte >> 16) & 0x0F;
+  result[4] = (uint8)(byte >> 12) & 0x0F;
+  result[5] = (uint8)(byte >> 8) & 0x0F;
+  result[6] = (uint8)(byte >> 4) & 0x0F;
+  result[7] = (uint8)byte & 0x0F;
+  
+  for(i=0; i<8; ++i)
   {
-    // Received
-    RI = 0;
+    if(result[i] < 0x0A)
+      result[i] += 48;
+    else
+      result[i] += 55;
   }
+  
+  result[8] = ' ';
+  
+  uart_print(result, 9);
+}
+
+void uart_dump(uint8* block, uint16 bytes)
+{
+  uint16 byte;
+  uint16 position = 0;
+  uint8 i;
+  
+  uart_print("ADDRESS  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F  ASCII\n\r", 64);
+  
+  for(byte=0; byte<bytes; byte+=16)
+  {
+    uart_hex32((uint32)byte);
+    
+    for(i=0; i<16; ++i)
+    {
+      uart_hex8(block[position]);
+      if(block[position] < 0x20 || block[position] > 0x7E)
+        block[position] = '.';
+      position++;
+    }
+    
+    uart_print(&block[byte], 16);
+    uart_print("\n\r", 2);
+  }
+  
+  uart_print("\n\r", 2);
 }

@@ -9,15 +9,14 @@
 
 #include "main.h"
 
-#define UART_BUFFER_SIZE (34)
-static uint8* idata uart_buffer;//[UART_BUFFER_SIZE];
-static uint8 uart_bufferLength;
-static uint8 uart_bufferPos = 0;
-
 void uart_init(void);
 
 void uart_print(uint8* string, uint8 length);
 
-void uart_ISR(void);
+void uart_hex8(uint8 c);
+
+void uart_hex32(uint32 byte);
+
+void uart_dump(uint8* block, uint16 bytes);
 
 #endif //UART_H

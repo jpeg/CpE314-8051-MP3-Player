@@ -8,6 +8,7 @@
 #define SPI_SDCARD_H
 
 #include "main.h"
+#include "ports.h"
 
 void spi_sdcard_init(void);
 

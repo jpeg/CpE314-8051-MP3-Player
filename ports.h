@@ -7,6 +7,8 @@
 #ifndef PORTS_H
 #define PORTS_H
 
+sbit nCS = P1^4;
+
 sbit switch1 = P2^0;
 sbit switch2 = P2^1;
 sbit switch3 = P2^2;

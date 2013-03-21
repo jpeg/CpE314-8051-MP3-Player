@@ -24,11 +24,9 @@ void main(void)
   CKCON1 = 0x00;
   
   // Initialize
-  yellowLED=1;
   rtos_init();
   rtos_task(&task_readSwitches, 1);
   rtos_task(&task_dumpString, 2000);
-  yellowLED=0;
   
   // Run
 	rtos_spin();
@@ -167,6 +165,8 @@ void task_readSwitches(void)
 
 void task_dumpString(void)
 {
-  uint8 string[16] = "Testing! Works??";
-  uart_print(string, 16);
+  uint8 string[32] = "Testing! Works it does IT DOES\n\r";
+  yellowLED = 0;
+  uart_dump(string, 32);
+  yellowLED = 1;
 }

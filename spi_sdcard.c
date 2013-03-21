@@ -17,6 +17,9 @@ void spi_sdcard_init(void)
 void spi_sdcard_command(uint8 cmd, uint32 arg)
 {
   uint8 checkSum = 0x01;
+  static bit first = 0;
+  
+  greenLED = 0;
   
   // Checksum
   if(cmd == 0)
@@ -28,7 +31,11 @@ void spi_sdcard_command(uint8 cmd, uint32 arg)
   cmd &= 0x7F;
   cmd |= 0x40;
   
-  while((SPSTA & 0x80) != 0x80);
+  nCS = 0;
+  if(first)
+    while((SPSTA & 0x80) != 0x80);
+  else
+    first = 1;
   SPDAT = cmd;
   while((SPSTA & 0x80) != 0x80);
   SPDAT = arg >> 24;
@@ -40,4 +47,7 @@ void spi_sdcard_command(uint8 cmd, uint32 arg)
   SPDAT = arg & 0xFFUL;
   while((SPSTA & 0x80) != 0x80);
   SPDAT = checkSum;
+  nCS = 1;
+  
+  greenLED = 1;
 }

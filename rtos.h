@@ -40,13 +40,4 @@ void rtos_spin();
 // Runs applications each tick, uses timer2
 void rtos_tick_ISR(void);
 
-// Adds a character array to the print buffer
-//void rtos_print(char string[], uint8 length);
-
-// Prints array of 8 bytes
-//void rtos_hex(uint8 bytes[]);
-
-// Prints 8 bytes around given location
-//void rtos_dump(uint8* ptr, uint16 numBytes);
-
 #endif //RTOS_H
