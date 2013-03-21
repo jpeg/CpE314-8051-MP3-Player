@@ -17,6 +17,13 @@ void rtos_init(void)
   reloadHigh = (uint8)(reload / 256);
   reloadLow = (uint8)(reload % 256);
   
+  // X2 Mode
+  CKCON0 = 0x01;
+  CKCON1 = 0x00;
+  
+  // XRAM Size
+  AUXR |= 0x0C;
+  
 	// Init timer2
   T2CON = 0x04;
   TH2 = reloadHigh;
@@ -81,10 +88,71 @@ uint16 rtos_getRate(task_type task)
 void rtos_spin()
 {
   bit spin = 1;
+  uint32 block;
+  uint8 byte;
+  bit add;
+  bit input;
+  bit currentXRam = 1;
+  
+  uint16 j;
+  for(j=0; j<512; ++j)
+  {
+    rtos_sdBuffer[0][j] = (uint8)j;
+    rtos_sdBuffer[1][j] = (uint8)(511 - j);
+  }
+  
   while(spin)
   {
-    // Sleep until next interrupt
-    PCON |= 0x01;
+    uart_print("Enter block hex: ", 17);
+    
+    // Input block hex number
+    block = 0;
+    input = 1;
+    while(input)
+    {
+      add = 0;
+      while(!RI);
+      RI = 0;
+      byte = SBUF;
+      
+      uart_print(&byte, 1);
+      
+      if(byte == '\r')
+      {
+        input = 0;
+        uart_print("\n", 1);
+      }
+      else if(byte == 0x08) //backspace
+        block = block >> 4;
+      else if(byte >= 0x30 && byte <= 0x39) //number
+      {
+        byte &= 0x0F;
+        add = 1;
+      }
+      else if(byte >= 0x41 && byte <= 0x46) //uppercase hex letter
+      {
+        byte -= 55;
+        add = 1;
+      }
+      else if(byte >= 0x61 && byte <= 0x66) //lowercase hex letter
+      {
+        byte -= 87;
+        add = 1;
+      }
+      
+      if(add)
+      {
+        block = block << 4;
+        block |= (uint32)byte;
+      }
+    }
+    
+    
+    uart_hex32(block);uart_print("\n\r", 2);
+    // Dump block
+    currentXRam = ~currentXRam;
+    //TODO copy block from SD card
+    uart_dump(rtos_sdBuffer[currentXRam], 512);
   }
 }
 

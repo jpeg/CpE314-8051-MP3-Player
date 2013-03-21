@@ -8,6 +8,7 @@
 #define UART_H
 
 #include "main.h"
+#include "ports.h"
 
 void uart_init(void);
 

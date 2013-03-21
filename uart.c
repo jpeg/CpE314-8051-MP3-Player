@@ -9,7 +9,7 @@
 void uart_init(void)
 {
   PCON = 0x80;
-  SCON = 0x40;
+  SCON = 0x50;
   BDRCON &= 0xEE;
   BDRCON |= 0x0E;
   BRL = 256 - 2*OSC_FREQ / (32*BAUDRATE);
@@ -17,7 +17,7 @@ void uart_init(void)
   
   IPH0 &= 0xEF; // Priority 0
   IPL0 &= 0xEF;
-  ES = 1;
+  ES = 0; //disable serial interrupt
   
   EA = 1;
 }
@@ -26,12 +26,16 @@ void uart_print(uint8* string, uint8 length)
 {
   uint8 i;
   
+  yellowLED = 0;
+  
   for(i=0; i<length; ++i)
   {
     SBUF = string[i];
     while(!TI);
     TI = 0;
   }
+  
+  yellowLED = 1;
 }
 
 void uart_hex8(uint8 c)
