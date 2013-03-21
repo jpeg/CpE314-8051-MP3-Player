@@ -51,3 +51,44 @@ void spi_sdcard_command(uint8 cmd, uint32 arg)
   
   greenLED = 1;
 }
+
+uint8 spi_sdcard_response(uint8 numBytes, uint8* buffer)
+{
+  uint8 in, i;
+  uint8* current;
+  uint8 error = 0;
+  
+  current = buffer;
+  
+  while((SPSTA & 0x80) != 0x80);
+  do
+  {
+    SPDAT = 0xFF;
+    while((SPSTA & 0x80) != 0x80);
+    in = SPDAT;
+  } while(in == 0xFF);
+  
+  *current = in;
+  current++;
+  
+  if(in == 0x01 || in == 0x00)
+  {
+    numBytes--;
+    if(numBytes != 0)
+    {
+      for(i=0; i<numBytes; ++i)
+      {
+        SPSTA = 0xFF;
+        while((SPSTA & 0x80) != 0x80);
+        in = SPDAT;
+      }
+    }
+    else
+      error = 1;
+    
+    SPDAT = 0xFF;
+    while((SPSTA & 0x80) != 0x80);
+  }
+  
+  return error;
+}
