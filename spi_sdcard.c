@@ -216,10 +216,10 @@ uint8 spi_sdcard_block(uint16 numBytes, uint8* buffer)
         SPDAT = 0xFF;
         while((SPSTA & 0x80) != 0x80 && ++timeout != 255);
         buffer[i] = SPDAT;
-        uart_hex8(SPDAT);/*uart_hex8(buffer[i]);uart_print(" ", 1);*/    
+            
         if(timeout == 255)
           error = 2;
-      }uart_print("\n\r\n\r",4);
+      }
       
       // Read checksum
       for(i=0; i<2; ++i)
