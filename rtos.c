@@ -6,6 +6,9 @@
 
 #include "rtos.h"
 
+uint8 xdata rtos_sdBuffer1[512];
+uint8 xdata rtos_sdBuffer2[512];
+
 void rtos_init(void)
 {
   uint16 reload;
@@ -22,9 +25,9 @@ void rtos_init(void)
   CKCON1 = 0x00;
   
   // XRAM Size
-  AUXR |= 0x0C;
-  AUXR &= 0xFD;
-  
+  //AUXR |= 0x0C;
+  //AUXR &= 0xFD;
+  AUXR = 0x0D;
 	// Init timer2
   T2CON = 0x04;
   TH2 = reloadHigh;
