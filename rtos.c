@@ -23,7 +23,7 @@ void rtos_init(void)
   
   // XRAM Size
   AUXR |= 0x0C;
-  AUXR &= 0x02;
+  AUXR &= 0xFD;
   
 	// Init timer2
   T2CON = 0x04;
