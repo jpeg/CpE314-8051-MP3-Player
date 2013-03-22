@@ -23,6 +23,7 @@ void rtos_init(void)
   
   // XRAM Size
   AUXR |= 0x0C;
+  AUXR &= 0x02;
   
 	// Init timer2
   T2CON = 0x04;
@@ -93,6 +94,10 @@ void rtos_spin()
   bit add;
   bit input;
   bit currentXRam = 1;
+  uint8* buffer;
+  uint8 error = 0;
+  
+  blockReadIndicator = 1;
   
   while(spin)
   {
@@ -144,8 +149,19 @@ void rtos_spin()
     
     // Dump block
     currentXRam = ~currentXRam;
-    //TODO copy block from SD card
-    uart_dump(rtos_sdBuffer[currentXRam], 512);
+    if(currentXRam)
+      buffer = rtos_sdBuffer2;
+    else
+      buffer = rtos_sdBuffer1;
+    blockReadIndicator = 0;
+    spi_sdcard_command(17, block);
+    error = spi_sdcard_block(512, buffer);
+    blockReadIndicator = 1;
+    if(error == 0)
+        uart_dump(buffer, 512);
+    
+    if(error != 0)
+      uart_print("SD card read error\n\r", 21);
   }
 }
 

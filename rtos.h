@@ -22,7 +22,8 @@ static task_type idata rtos_tasks[RTOS_MAX_NUM_TASKS];
 static uint16 idata rtos_taskCounts[RTOS_MAX_NUM_TASKS];
 static uint16 idata rtos_taskCounters[RTOS_MAX_NUM_TASKS];
 
-static uint8 xdata rtos_sdBuffer[2][512];
+static uint8 xdata rtos_sdBuffer1[512];
+static uint8 xdata rtos_sdBuffer2[512];
 
 // Initalize the RT OS
 void rtos_init(void);

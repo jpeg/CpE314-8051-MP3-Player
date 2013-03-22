@@ -7,6 +7,7 @@
 #ifndef PORTS_H
 #define PORTS_H
 
+sbit blockReadIndicator = P1^3;
 sbit nCS = P1^4;
 
 sbit switch1 = P2^0;
