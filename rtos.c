@@ -161,7 +161,12 @@ void rtos_spin()
         uart_dump(buffer, 512);
     
     if(error != 0)
-      uart_print("SD card read error\n\r", 21);
+    {
+      redLED = 0;
+      uart_print("SD card read error ", 20);
+      uart_hex8(error);
+      uart_print("\n\r", 2);
+    }
   }
 }
 

@@ -9,7 +9,7 @@
 void spi_sdcard_init(void)
 {
   uint8 i, response[16];
-  //uint32* response32 = &response[1];
+  uint32* response32 = &response[1];
   uint8 error = 0;
   
   SPCON = 0x73;
@@ -31,11 +31,11 @@ void spi_sdcard_init(void)
   {
     spi_sdcard_command(8, 0x000001AA);
     error = spi_sdcard_response(5, response);
-    /*if(error == 0)
+    if(error == 0)
     {
       if(*response32 != 0x000001AA)
         error = 3;
-    }*/
+    }
   }
   
   // Send CMD58
@@ -43,8 +43,8 @@ void spi_sdcard_init(void)
   {
     spi_sdcard_command(58, 0);
     error = spi_sdcard_response(5, response);
-    //if(error == 0 && (response[2] & 0x30) != 0x30)
-    //  error = 4;
+    if(error == 0 && (response[2] & 0x30) != 0x30)
+      error = 4;
   }
   
   // Send ACMD41
@@ -61,20 +61,20 @@ void spi_sdcard_init(void)
   {
     spi_sdcard_command(58, 0);
     error = spi_sdcard_response(5, response);
-    /*if(error == 0 && (response[1] & 0x40) != 0x40)
+    if(error == 0 && (response[1] & 0x40) != 0x40)
     {
       // Standard capacity card
       //spi_sdcard_command(16, 512);
       //error = spi_sdcard_response(1, response);
       error = 5;
-    }*/
+    }
   }
   
   // Send CMD9
   if(error == 0)
   {
     spi_sdcard_command(9, 0);
-    error = spi_sdcard_response(16, response);
+    error = spi_sdcard_block(16, response);
     uart_dump(response, 16);
   }
   
@@ -82,12 +82,17 @@ void spi_sdcard_init(void)
   if(error == 0)
   {
     spi_sdcard_command(10, 0);
-    error = spi_sdcard_response(16, response);
+    error = spi_sdcard_block(16, response);
     uart_dump(response, 16);
   }
   
   if(error != 0)
+  {
     redLED = 0;
+    uart_print("SD card error ", 15);
+    uart_hex8(error);
+    uart_print("\n\r", 2);
+  }
 }
 
 void spi_sdcard_command(uint8 cmd, uint32 arg)
@@ -155,7 +160,7 @@ uint8 spi_sdcard_response(uint8 numBytes, uint8* buffer)
       {
         timeout = 0;
         SPDAT = 0xFF;
-        while((SPSTA & 0x80) != 0x80 && ++timeout > 255);
+        while((SPSTA & 0x80) != 0x80 && ++timeout != 255);
         *current = SPDAT;
         current++;
         
@@ -182,7 +187,7 @@ uint8 spi_sdcard_block(uint16 numBytes, uint8* buffer)
   uint16 i; 
   uint8 timeout;
   uint8 error = 0;
-  uart_hex32((uint32)buffer);uart_print("\n\r",2);
+  
   amberLED = 0;
   
   do
@@ -192,17 +197,46 @@ uint8 spi_sdcard_block(uint16 numBytes, uint8* buffer)
     in = SPDAT;
   } while(in == 0xFF);
   
-  buffer[0] = in;
-  for(i=1; i<numBytes; ++i)
+  if(in == 0x00)
   {
-    timeout = 0;
-    SPDAT = 0xFF;
-    while((SPSTA & 0x80) != 0x80 && ++timeout > 255);
-    buffer[i] = SPDAT;
+    
+    do
+    {
+      SPDAT = 0xFF;
+      while((SPSTA & 0x80) != 0x80);
+      in = SPDAT;
+    } while(in == 0xFF);
+    
+    if(in == 0xFE)
+    {
+      // Read block
+      for(i=0; i<numBytes; ++i)
+      {
+        timeout = 0;
+        SPDAT = 0xFF;
+        while((SPSTA & 0x80) != 0x80 && ++timeout != 255);
+        buffer[i] = SPDAT;
+        uart_hex8(SPDAT);/*uart_hex8(buffer[i]);uart_print(" ", 1);*/    
+        if(timeout == 255)
+          error = 2;
+      }uart_print("\n\r\n\r",4);
+      
+      // Read checksum
+      for(i=0; i<2; ++i)
+      {
+        SPDAT = 0xFF;
+        while((SPSTA & 0x80) != 0x80 && ++timeout != 255);
+        in = SPDAT;
         
-    if(timeout == 255)
-      error = 2;
+        if(timeout == 255)
+          error = 2;
+      }
+    }
+    else
+      error = 3;
   }
+  else
+    error = 1;
   
   nCS = 1;
   amberLED = 1;
