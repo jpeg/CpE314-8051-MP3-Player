@@ -6,6 +6,8 @@
 
 #include "spi_sdcard.h"
 
+static bit spi_sdcard_standardCapacity = 0;
+
 void spi_sdcard_init(void)
 {
   uint8 i, response[16];
@@ -64,9 +66,9 @@ void spi_sdcard_init(void)
     if(error == 0 && (response[1] & 0x40) != 0x40)
     {
       // Standard capacity card
-      //spi_sdcard_command(16, 512);
-      //error = spi_sdcard_response(1, response);
-      error = 5;
+      spi_sdcard_command(16, 512);
+      error = spi_sdcard_response(1, response);
+      spi_sdcard_standardCapacity = 1;
     }
   }
   
@@ -109,6 +111,8 @@ void spi_sdcard_command(uint8 cmd, uint32 arg)
   }
   else if(cmd == 8)
     checkSum = 0x87;
+  else if(cmd == 17 && spi_sdcard_standardCapacity)
+    arg *= 512;
   
   cmd &= 0x7F;
   cmd |= 0x40;
