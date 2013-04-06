@@ -17,11 +17,6 @@
 #define RTOS_MAX_NUM_TASKS (2)
 typedef void (*task_type)(void);
 
-static uint8 rtos_numTasks;
-static task_type idata rtos_tasks[RTOS_MAX_NUM_TASKS];
-static uint16 idata rtos_taskCounts[RTOS_MAX_NUM_TASKS];
-static uint16 idata rtos_taskCounters[RTOS_MAX_NUM_TASKS];
-
 // Initalize the RT OS
 void rtos_init(void);
 
