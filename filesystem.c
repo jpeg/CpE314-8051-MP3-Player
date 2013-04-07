@@ -13,22 +13,26 @@ uint8 read8(uint16 offset, uint8 xdata* array)
 
 uint16 read16(uint16 offset, uint8 xdata* array)
 {
-  uint16 value;
+  uint16 idata value;
+  uint8 idata* ptr;
   
-  value = array[offset];
-  value |= array[++offset] << 8;
+  ptr = (&value) + 1;
+  *ptr = array[offset];
+  *(++ptr) = array[--offset];
   
   return value;
 }
 
 uint32 read32(uint16 offset, uint8 xdata* array)
 {
-  uint32 value;
+  uint32 idata value;
+  uint8 idata* ptr;
   
-  value = array[offset];
-  value |= array[++offset] << 8;
-  value |= array[++offset] << 16;
-  value |= array[++offset] << 24;
+  ptr = (&value) + 3;
+  *ptr = array[offset];
+  *(++ptr) = array[--offset];
+  *(++ptr) = array[--offset];
+  *(++ptr) = array[--offset];
   
   return value;
 }
