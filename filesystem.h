@@ -8,6 +8,10 @@
 #define FILESYSTEM_H
 
 #include "main.h"
+#include "spi_sdcard.h"
+#include "uart.h"
+
+void fs_init();
 
 // Utility functions
 uint8 read8(uint16 offset, uint8 xdata* array);

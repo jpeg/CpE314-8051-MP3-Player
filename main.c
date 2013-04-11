@@ -20,13 +20,13 @@ void main(void)
 {
   // Initialize
   rtos_init();
-  rtos_task(&task_readSwitches, 20);
+  //rtos_task(&task_readSwitches, 20);
   
   // Run
 	rtos_spin();
 }
 
-void task_readSwitches(void)
+/*void task_readSwitches(void)
 {
   // Switch1 debounce
   switch(switchStates[0])
@@ -155,4 +155,4 @@ void task_readSwitches(void)
     switchStates[3] = WAIT_PRESS;
     break;
   }
-}
+}*/

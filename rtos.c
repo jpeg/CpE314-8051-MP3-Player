@@ -10,8 +10,8 @@ static uint8 rtos_numTasks;
 static task_type idata rtos_tasks[RTOS_MAX_NUM_TASKS];
 static uint16 idata rtos_taskCounts[RTOS_MAX_NUM_TASKS];
 static uint16 idata rtos_taskCounters[RTOS_MAX_NUM_TASKS];
-uint8 xdata rtos_sdBuffer1[512];
-uint8 xdata rtos_sdBuffer2[512];
+//uint8 xdata rtos_sdBuffer1[512];
+//uint8 xdata rtos_sdBuffer2[512];
 
 void rtos_init(void)
 {
@@ -29,9 +29,8 @@ void rtos_init(void)
   CKCON1 = 0x00;
   
   // XRAM Size
-  //AUXR |= 0x0C;
-  //AUXR &= 0xFD;
   AUXR = 0x0D;
+  
 	// Init timer2
   T2CON = 0x04;
   TH2 = reloadHigh;
@@ -50,6 +49,7 @@ void rtos_init(void)
   
   uart_init();
   spi_sdcard_init();
+  fs_init();
 }
 
 void rtos_task(task_type task, uint16 msec)
@@ -96,7 +96,7 @@ uint16 rtos_getRate(task_type task)
 void rtos_spin()
 {
   bit spin = 1;
-  uint32 block;
+  /*uint32 block;
   uint8 byte;
   bit add;
   bit input;
@@ -104,10 +104,10 @@ void rtos_spin()
   uint8* buffer;
   uint8 error = 0;
   
-  blockReadIndicator = 1;
+  blockReadIndicator = 1;*/
   
-  while(spin)
-  {
+  while(spin);
+  /*{
     uart_print("Enter block hex: ", 17);
     
     // Input block hex number
@@ -174,7 +174,7 @@ void rtos_spin()
       uart_hex8(error);
       uart_print("\n\r", 2);
     }
-  }
+  }*/
 }
 
 void rtos_tick_ISR(void) interrupt 5 using 3

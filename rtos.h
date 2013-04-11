@@ -13,6 +13,7 @@
 #include "ports.h"
 #include "uart.h"
 #include "spi_sdcard.h"
+#include "filesystem.h"
 
 #define RTOS_MAX_NUM_TASKS (2)
 typedef void (*task_type)(void);
