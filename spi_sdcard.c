@@ -77,7 +77,7 @@ void spi_sdcard_init(void)
   {
     spi_sdcard_command(9, 0);
     error = spi_sdcard_block(16, response);
-    uart_dump(response, 16);
+    //uart_dump(response, 16);
   }
   
   // Send CMD10
@@ -85,7 +85,7 @@ void spi_sdcard_init(void)
   {
     spi_sdcard_command(10, 0);
     error = spi_sdcard_block(16, response);
-    uart_dump(response, 16);
+    //uart_dump(response, 16);
   }
   
   if(error != 0)

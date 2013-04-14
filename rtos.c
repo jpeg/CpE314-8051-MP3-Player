@@ -179,7 +179,7 @@ void rtos_spin()
 
 void rtos_tick_ISR(void) interrupt 5 using 3
 {
-  uint8 currentTask;
+  /*uint8 currentTask;
   
 	TF2 = 0;
 
@@ -191,5 +191,5 @@ void rtos_tick_ISR(void) interrupt 5 using 3
       rtos_tasks[currentTask]();
       rtos_taskCounters[currentTask] = rtos_taskCounts[currentTask];
     }
-  }
+  }*/
 }
