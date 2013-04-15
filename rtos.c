@@ -10,8 +10,6 @@ static uint8 rtos_numTasks;
 static task_type idata rtos_tasks[RTOS_MAX_NUM_TASKS];
 static uint16 idata rtos_taskCounts[RTOS_MAX_NUM_TASKS];
 static uint16 idata rtos_taskCounters[RTOS_MAX_NUM_TASKS];
-//uint8 xdata rtos_sdBuffer1[512];
-//uint8 xdata rtos_sdBuffer2[512];
 
 void rtos_init(void)
 {
@@ -52,7 +50,7 @@ void rtos_init(void)
   fs_init();
 }
 
-void rtos_task(task_type task, uint16 msec)
+/*void rtos_task(task_type task, uint16 msec)
 {
   rtos_tasks[rtos_numTasks] = task;
   if(msec > 0)
@@ -61,57 +59,28 @@ void rtos_task(task_type task, uint16 msec)
     rtos_taskCounts[rtos_numTasks] = 1;
   rtos_taskCounters[rtos_numTasks] = 1;
   rtos_numTasks++;
-}
-
-/* Disabled to reduce mem usage
-void rtos_rate(task_type task, uint16 msec)
-{
-  uint8 currentTask;
-  
-  for(currentTask=0; currentTask<rtos_numTasks; ++currentTask)
-  {
-    if(rtos_tasks[currentTask] == task)
-    {
-      rtos_taskCounts[currentTask] = msec;
-      if(rtos_taskCounters[currentTask] > rtos_taskCounts[currentTask])
-        rtos_taskCounters[currentTask] = msec;
-      break;
-    }
-  }
-}
-
-uint16 rtos_getRate(task_type task)
-{
-  uint8 currentTask;
-  
-  for(currentTask=0; currentTask<rtos_numTasks; ++currentTask)
-  {
-    if(rtos_tasks[currentTask] == task)
-      return rtos_taskCounts[currentTask];
-  }
-  
-  return 0;
 }*/
 
 void rtos_spin()
 {
   bit spin = 1;
-  /*uint32 block;
+  uint32 currentDirectory = 2;
+  uint32 result;
+  uint8 choice;
   uint8 byte;
   bit add;
   bit input;
-  bit currentXRam = 1;
-  uint8* buffer;
   uint8 error = 0;
   
-  blockReadIndicator = 1;*/
-  fs_listDirectoryEntries(2);
   while(spin);
-  /*{
-    uart_print("Enter block hex: ", 17);
+  {
+    // Display directory entries list
+    fs_listDirectoryEntries(currentDirectory);
+    
+    uart_print("Enter choice: ", 14);
     
     // Input block hex number
-    block = 0;
+    choice = 0;
     input = 1;
     while(input)
     {
@@ -129,7 +98,7 @@ void rtos_spin()
       }
       else if(byte == 0x08) //backspace
       {
-        block = block >> 4;
+        choice = choice >> 4;
       }
       else if(byte >= 0x30 && byte <= 0x39) //number
       {
@@ -149,37 +118,21 @@ void rtos_spin()
       
       if(add)
       {
-        block = block << 4;
-        block |= (uint32)byte;
+        choice = choice << 4;
+        choice |= choice;
       }
     }
     
-    // Dump block
-    currentXRam = ~currentXRam;
-    if(currentXRam)
-      buffer = rtos_sdBuffer2;
-    else
-      buffer = rtos_sdBuffer1;
-    blockReadIndicator = 0;
-    spi_sdcard_command(17, block);
-    error = spi_sdcard_block(512, buffer);
-    blockReadIndicator = 1;
-    if(error == 0)
-        uart_dump(buffer, 512);
-    
-    if(error != 0)
-    {
-      redLED = 0;
-      uart_print("SD card read error ", 20);
-      uart_hex8(error);
-      uart_print("\n\r", 2);
-    }
-  }*/
+    // Display file or set new directory
+    result = fs_findChoice(currentDirectory, choice);
+    if(result != 0x00000000) //directory was chosen
+      currentDirectory = result;
+  }
 }
 
-void rtos_tick_ISR(void) interrupt 5 using 3
+/*void rtos_tick_ISR(void) interrupt 5 using 3
 {
-  /*uint8 currentTask;
+  uint8 currentTask;
   
 	TF2 = 0;
 
@@ -191,5 +144,5 @@ void rtos_tick_ISR(void) interrupt 5 using 3
       rtos_tasks[currentTask]();
       rtos_taskCounters[currentTask] = rtos_taskCounts[currentTask];
     }
-  }*/
-}
+  }
+}*/

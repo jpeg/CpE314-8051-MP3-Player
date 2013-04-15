@@ -9,12 +9,12 @@
 #include "rtos.h"
 
 // Tasks
-void task_readSwitches(void);
+//void task_readSwitches(void);
 
 // Task variables
-static enum SwitchStates { WAIT_PRESS, PRESS_DETECTED, PRESSED, WAIT_RELEASE, 
-               RELEASE_DETECTED };
-static uint8 switchStates[4] = { WAIT_PRESS, WAIT_PRESS, WAIT_PRESS, WAIT_PRESS };
+//static enum SwitchStates { WAIT_PRESS, PRESS_DETECTED, PRESSED, WAIT_RELEASE, 
+//               RELEASE_DETECTED };
+//static uint8 switchStates[4] = { WAIT_PRESS, WAIT_PRESS, WAIT_PRESS, WAIT_PRESS };
 
 void main(void)
 {

@@ -19,7 +19,11 @@ void fs_init();
 
 uint32 fs_FATentry(const uint32 cluster);
 
-uint32 fs_listDirectoryEntries(const uint32 startCluster);
+void fs_listDirectoryEntries(const uint32 startCluster);
+
+uint32 fs_findChoice(const uint32 startCluster, const uint8 choice);
+
+void fs_printFile(uint32 cluster);
 
 void fs_swapBuffer();
 
