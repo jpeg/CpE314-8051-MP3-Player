@@ -92,6 +92,7 @@ void uart_dump(uint8* block, uint16 bytes)
   uint16 position = 0;
   uint8 i;
   
+  // Disabled for code size
   uart_print("ADDRESS  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F  ASCII\n\r", 64);
   
   for(byte=0; byte<bytes; byte+=16)

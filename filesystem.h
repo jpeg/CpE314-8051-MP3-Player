@@ -11,7 +11,7 @@
 #include "spi_sdcard.h"
 #include "uart.h"
 
-// Extern variables
+// Declare extern variables
 extern uint32 idata fs_FATfirstDataSector;
 extern uint32 idata fs_FATsectorsPerCluster;
 

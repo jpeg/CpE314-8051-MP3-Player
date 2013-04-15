@@ -33,11 +33,12 @@ void spi_sdcard_init(void)
   {
     spi_sdcard_command(8, 0x000001AA);
     error = spi_sdcard_response(5, response);
+    /* Disabled for code size
     if(error == 0)
     {
       if(*response32 != 0x000001AA)
         error = 3;
-    }
+    }*/
   }
   
   // Send CMD58
@@ -45,8 +46,9 @@ void spi_sdcard_init(void)
   {
     spi_sdcard_command(58, 0);
     error = spi_sdcard_response(5, response);
+    /* Disabled for code size
     if(error == 0 && (response[2] & 0x30) != 0x30)
-      error = 4;
+      error = 4;*/
   }
   
   // Send ACMD41
@@ -77,7 +79,6 @@ void spi_sdcard_init(void)
   {
     spi_sdcard_command(9, 0);
     error = spi_sdcard_block(16, response);
-    //uart_dump(response, 16);
   }
   
   // Send CMD10
@@ -85,7 +86,6 @@ void spi_sdcard_init(void)
   {
     spi_sdcard_command(10, 0);
     error = spi_sdcard_block(16, response);
-    //uart_dump(response, 16);
   }
   
   if(error != 0)
