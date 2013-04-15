@@ -8,12 +8,13 @@
 
 uint8 xdata fs_sdBuffer1[512];
 uint8 xdata fs_sdBuffer2[512];
-uint8 xdata* fs_buffer;
+static uint8 xdata* fs_buffer;
 
 enum FATtype { FAT16 = 1, FAT32 = 2 };
 uint8 idata fs_FAToffset;
 uint32 idata fs_FATstartSector;
 uint32 idata fs_FATfirstDataSector;
+uint32 idata fs_FATsectorsPerCluster;
 
 void fs_init()
 {
@@ -64,11 +65,28 @@ void fs_init()
       fs_FATfirstDataSector = reservedSectorCount + 2 << fs_FAToffset + rootDirSectors;//relative sectors?
     }
     
+    fs_FATsectorsPerCluster = read8(0x000D, fs_buffer);
+    
+    //TODO start of FAT
+    
+    // Assume bytes per sector = 512 for code size
+    if(read16(0x000B, fs_buffer))
+      error = 11;
+    
+    //DEBUG
     uart_dump(fs_buffer, 512);
   }
   
   if(error != 0)
       redLED = 0;
+}
+
+uint32 fs_selectDirectoryEntry(uint32 startCluster)
+{
+}
+
+void fs_longFilename(uint32 cluster)
+{
 }
 
 void fs_swapBuffer()
