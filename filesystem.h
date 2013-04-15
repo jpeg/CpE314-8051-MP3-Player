@@ -11,13 +11,15 @@
 #include "spi_sdcard.h"
 #include "uart.h"
 
+// Extern variables
+extern uint32 idata fs_FATfirstDataSector;
+extern uint32 idata fs_FATsectorsPerCluster;
+
 void fs_init();
 
-uint32 fs_FATentry(uint32 cluster);
+uint32 fs_FATentry(const uint32 cluster);
 
-uint32 fs_selectDirectoryEntry(uint32 startCluster);
-
-void fs_longFilename(uint32 cluster);
+uint32 fs_listDirectoryEntries(const uint32 startCluster);
 
 void fs_swapBuffer();
 

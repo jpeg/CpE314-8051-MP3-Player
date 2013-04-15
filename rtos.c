@@ -105,7 +105,7 @@ void rtos_spin()
   uint8 error = 0;
   
   blockReadIndicator = 1;*/
-  
+  fs_listDirectoryEntries(2);
   while(spin);
   /*{
     uart_print("Enter block hex: ", 17);
