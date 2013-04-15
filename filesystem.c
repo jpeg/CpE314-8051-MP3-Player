@@ -118,6 +118,7 @@ uint32 fs_listDirectoryEntries(const uint32 startCluster)
   bit longFilename = 0;
   uint8 idata entryCount = 0;
   uint8 idata byte;
+  uint8 idata i;
   
   
   while(cluster != 0x0FFFFFFF && cluster != 0x0000FFFF)
@@ -145,20 +146,21 @@ uint32 fs_listDirectoryEntries(const uint32 startCluster)
           // Ignore long filenames for now
           break;
           
-        case 0x00: //File
-        case 0x20: //Archive
+        case 0x00: // File
+        case 0x20: // Archive
           uart_hex8(entryCount++);
-          uart_print(")  ", 3);
-          uart_print(fs_buffer + relativeEntry, 8);
+          uart_print(")     ", 6);
+          for(i=0; i<8 && *(fs_buffer+relativeEntry+i) != ' '; ++i)
+            uart_print(fs_buffer + relativeEntry + i, 1);
           uart_print(".", 1);
           uart_print(fs_buffer + relativeEntry + 8, 3);
           uart_print("\n\r", 2);
           longFilename = 0;
           break;
           
-        case 0x10: //Directory
+        case 0x10: // Directory
           uart_hex8(entryCount++);
-          uart_print(")  DIR ", 7);
+          uart_print(") DIR ", 6);
           uart_print(fs_buffer + relativeEntry, 11);
           uart_print("\n\r", 2);
           break;
