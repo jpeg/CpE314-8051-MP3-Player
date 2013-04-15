@@ -13,6 +13,8 @@
 
 void fs_init();
 
+uint32 fs_FATentry(uint32 cluster);
+
 uint32 fs_selectDirectoryEntry(uint32 startCluster);
 
 void fs_longFilename(uint32 cluster);

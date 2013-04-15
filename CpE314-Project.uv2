@@ -9,6 +9,7 @@ File 1,1,<.\main.c><main.c>
 File 1,1,<.\rtos.c><rtos.c>
 File 1,1,<.\uart.c><uart.c>
 File 1,1,<.\spi_sdcard.c><spi_sdcard.c>
+File 1,1,<.\filesystem.c><filesystem.c>
 
 
 Options 1,0,0  // Target 'Target 1'
@@ -84,7 +85,7 @@ Options 1,0,0  // Target 'Target 1'
  LX51UCL ()
  LX51CSC ()
  LX51UCS ()
- LX51COB (0X0000-0X1FFF)
+ LX51COB ()
  LX51XDB ()
  LX51PDB ()
  LX51BIB ()

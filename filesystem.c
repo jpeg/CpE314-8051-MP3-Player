@@ -11,16 +11,16 @@ uint8 xdata fs_sdBuffer2[512];
 static uint8 xdata* fs_buffer;
 
 enum FATtype { FAT16 = 1, FAT32 = 2 };
-uint8 idata fs_FAToffset;
-uint32 idata fs_FATstartSector;
-uint32 idata fs_FATfirstDataSector;
-uint32 idata fs_FATsectorsPerCluster;
+static uint8 idata fs_FAToffset;
+static uint16 idata fs_FATreservedSectorCount;
+static uint32 idata fs_FATstartSector;
+static uint32 idata fs_FATfirstDataSector;
+static uint32 idata fs_FATsectorsPerCluster;
 
 void fs_init()
 {
   uint8 error = 0;
   uint32 relativeSectors;
-  uint16 reservedSectorCount;
   uint16 rootEntCnt;
   uint16 rootDirSectors;
   
@@ -50,11 +50,11 @@ void fs_init()
     else
       fs_FAToffset = FAT16;
     
-    reservedSectorCount = read16(0x000E, fs_buffer);
+    fs_FATreservedSectorCount = read16(0x000E, fs_buffer);
     rootEntCnt = read16(0x0011, fs_buffer);
     rootDirSectors = ((rootEntCnt*32) + (512-1)) / 512;
     
-    fs_FATstartSector = relativeSectors + reservedSectorCount;
+    fs_FATstartSector = relativeSectors + fs_FATreservedSectorCount;
     
     if(fs_FAToffset == FAT32)
     {
@@ -62,12 +62,11 @@ void fs_init()
     }
     else // FAT16
     {
-      fs_FATfirstDataSector = reservedSectorCount + 2 << fs_FAToffset + rootDirSectors;//relative sectors?
+      fs_FATfirstDataSector = fs_FATreservedSectorCount + 2 << fs_FAToffset + rootDirSectors;//relative sectors?
     }
     
     fs_FATsectorsPerCluster = read8(0x000D, fs_buffer);
     
-    //TODO start of FAT
     
     // Assume bytes per sector = 512 for code size
     if(read16(0x000B, fs_buffer))
@@ -79,6 +78,22 @@ void fs_init()
   
   if(error != 0)
       redLED = 0;
+}
+
+
+uint32 fs_FATentry(uint32 cluster)
+{
+  uint32 FATsectorNumber;
+  uint32 FATentryOffset;
+  
+  FATsectorNumber = fs_FATreservedSectorCount + (cluster << fs_FAToffset) / 512;
+  FATentryOffset = (cluster << fs_FAToffset) % 512;
+  
+  fs_swapBuffer();
+  spi_sdcard_command(17, FATsectorNumber);
+  spi_sdcard_block(512, fs_buffer);
+  
+  return read32(FATentryOffset, fs_buffer) & (fs_FAToffset == FAT32 ? 0xFFFF : 0x0FFFFFFF);
 }
 
 uint32 fs_selectDirectoryEntry(uint32 startCluster)
