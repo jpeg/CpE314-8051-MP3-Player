@@ -77,7 +77,7 @@ void rtos_spin()
     // Display directory entries list
     fs_listDirectoryEntries(currentDirectory);
     
-    uart_print("Enter choice: ", 14);
+    uart_print("Choice: ", 8);
     
     // Input block hex number
     choice = 0;

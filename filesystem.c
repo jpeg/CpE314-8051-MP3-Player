@@ -38,7 +38,7 @@ void fs_init()
       fs_FATrelativeSectors = 0;
     else // Master boot record, locate the boot sector
       fs_FATrelativeSectors = read32(0x01C6, fs_buffer);
-    uart_print("Boot Sector ", 12);
+    //uart_print("Boot Sector ", 12);
     uart_hex32(fs_FATrelativeSectors);
     uart_print("\n\r", 2);
   }
@@ -49,7 +49,7 @@ void fs_init()
   error = spi_sdcard_block(512, fs_buffer);
   if(error == 0)
   {
-    uart_print("File System ", 12);
+    //uart_print("File System ", 12);
     if(read8(0x0016, fs_buffer) == 0)
     {
       fs_FAToffset = FAT32;
@@ -87,9 +87,9 @@ void fs_init()
   if(error != 0)
   {
     redLED = 0;
-    uart_print("FAT Error ", 15);
+    /*uart_print("FAT Error ", 15);
     uart_hex8(error);
-    uart_print("\n\r", 2);
+    uart_print("\n\r", 2);*/
   }
   
   uart_print("\n\r", 2);
@@ -263,8 +263,8 @@ void fs_printFile(uint32 cluster)
       spi_sdcard_command(17, (cluster-2)*fs_FATsectorsPerCluster + relativeSector + fs_FATfirstDataSector);
       spi_sdcard_block(512, fs_buffer);
       
-      uart_print("Cluster ", 8);
-      uart_hex32(cluster);
+      //uart_print("Cluster ", 8);
+      //uart_hex32(cluster);
       uart_print(" Sector ", 8);
       uart_hex32((cluster-2)*fs_FATsectorsPerCluster + relativeSector + fs_FATfirstDataSector);
       uart_print("\n\r", 2);
