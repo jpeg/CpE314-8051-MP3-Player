@@ -110,7 +110,7 @@ uint32 fs_FATentry(const uint32 cluster)
   return read32(FATentryOffset, fs_buffer) & (fs_FAToffset == FAT32 ? 0xFFFF : 0x0FFFFFFF);
 }
 
-void fs_listDirectoryEntries(const uint32 startCluster)
+/*void fs_listDirectoryEntries(const uint32 startCluster)
 {
   uint32 idata cluster = startCluster;
   uint8 idata relativeSector = 0;
@@ -287,7 +287,7 @@ void fs_printFile(uint32 cluster)
     cluster = fs_FATentry(cluster);
     relativeSector = 0;
   }
-}
+}*/
 
 void fs_swapBuffer()
 {

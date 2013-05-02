@@ -64,69 +64,10 @@ void rtos_init(void)
 void rtos_spin()
 {
   bit spin = 1;
-  uint32 currentDirectory = 2;
-  uint32 result;
-  uint8 choice;
-  uint8 byte;
-  bit add;
-  bit input;
   uint8 error = 0;
   
   while(spin);
   {
-    // Display directory entries list
-    fs_listDirectoryEntries(currentDirectory);
-    
-    uart_print("Choice: ", 8);
-    
-    // Input block hex number
-    choice = 0;
-    input = 1;
-    while(input)
-    {
-      add = 0;
-      while(!RI);
-      RI = 0;
-      byte = SBUF;
-      
-      uart_print(&byte, 1);
-      
-      if(byte == '\r')
-      {
-        input = 0;
-        uart_print("\n", 1);
-      }
-      else if(byte == 0x08) //backspace
-      {
-        choice = choice >> 4;
-      }
-      else if(byte >= 0x30 && byte <= 0x39) //number
-      {
-        byte &= 0x0F;
-        add = 1;
-      }
-      else if(byte >= 0x41 && byte <= 0x46) //uppercase hex letter
-      {
-        byte -= 55;
-        add = 1;
-      }
-      else if(byte >= 0x61 && byte <= 0x66) //lowercase hex letter
-      {
-        byte -= 87;
-        add = 1;
-      }
-      
-      if(add)
-      {
-        choice = choice << 4;
-        choice |= choice;
-      }
-    }
-    
-    // Display file or set new directory
-    result = fs_findChoice(currentDirectory, choice);
-    if(result != 0x00000000) //directory was chosen
-      currentDirectory = result;
   }
 }
 

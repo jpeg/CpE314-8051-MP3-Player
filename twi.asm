@@ -1,5 +1,4 @@
 ;#include <regAT89C51RC2.inc>
-#include "twi.h"
 
 SCL BIT 0xB4
 SDA BIT 0xB5
