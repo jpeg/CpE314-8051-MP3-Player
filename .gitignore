@@ -8,6 +8,7 @@
 *.Opt
 *.Bak
 *.__i
+*._ia
 *.uvgui.*
 *.uvopt
 
