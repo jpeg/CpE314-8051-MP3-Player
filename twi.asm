@@ -14,7 +14,7 @@ VARS SEGMENT DATA OVERLAYABLE
 
 TWI_WRITE_CODE SEGMENT CODE
 	RSEG TWI_WRITE_CODE
-PUBLIC _TWI_WRITE;, _TWI_READ
+PUBLIC _TWI_WRITE
 
 _TWI_WRITE:
 	setb SCL
@@ -27,7 +27,7 @@ _TWI_WRITE:
 	mov num, A
 	mov A, R3		;if mem specific ptr
 	mov p_data, A
-	mov R7, #0x01	;bus busy error
+	mov R7, #0x01		;bus busy error
 	mov C, SCL
 	jnc exit
 	mov C, SDA
@@ -79,11 +79,9 @@ exit:
 	ret			;here for sjmp range limits
 wait_ack:
 	mov C, SCL
-	addc A, #0
-	jz wait_ack
+	jnc wait_ack
 	mov C, SDA
-	addc A, #0
-	jnz exit
+	jc exit
 	;dec num			;??? why two dec?
 	mov A, num
 	mov R7, 0x00
@@ -104,8 +102,7 @@ wait_ack:
 	acall delay
 wait_something:
 	mov C, SCL
-	addc A, #0
-	jz wait_something
+	jnc wait_something
 	mov delay_cnt, #2
 	acall delay
 	setb SDA
@@ -114,6 +111,15 @@ wait_something:
 delay:
 	nop
 	djnz delay_cnt, delay
+	ret
+
+TWI_READ_CODE SEGMENT CODE
+	RSEG TWI_READ_CODE
+PUBLIC _TWI_READ
+
+_TWI_READ:
+	;TODO
+exit2:
 	ret
 
 END
