@@ -65,17 +65,52 @@ void rtos_spin()
 {
   bit spin = 1;
   uint8 idata array[1] = {0x01};
+  uint8 idata array2[1] = {0x7E};
+  uint8 i;
   uint8 error = 0;
-  redLED=0;
+  
+  // Arrays from config.asm
+  extern uint8 code* CONFIG;
+  extern uint8 code* CONFIG2;
+  uint8 code* configPtr;
+  uint8 idata temp[2];
+  
   do
   {
     error = twi_write(0x43, 1, array); 
-  } while(error != 0);redLED=1;greenLED=0;
+  } while(error != 0);
   do
   {
-    error = twi_read(0x43, 1, array);
-  } while(error != 0);greenLED=1;
-  uart_hex8(array[0]);
+    error = twi_read(0x43, 1, array2);
+  } while(error != 0);
+  uart_hex8(array2[0]);
+  if(error != 0)
+    redLED = 0;
+  
+  // Send STAO13 config file
+  /*configPtr = CONFIG;
+  while(*configPtr != 0xFF)
+  {
+    temp[0] = *configPtr;
+    configPtr++;
+    temp[1] = *configPtr;
+    configPtr++;
+    error = twi_write(0x43, 2, temp);
+  }
+  
+  // Pause
+  for(i=0; i<50; ++i);
+  
+  // Send second STAO13 config
+  configPtr = CONFIG2;
+  while(*configPtr != 0xFF)
+  {
+    temp[0] = *configPtr;
+    configPtr++;
+    temp[1] = *configPtr;
+    configPtr++;
+    error = twi_write(0x43, 2, temp);
+  }*/
   
   while(spin);
   {

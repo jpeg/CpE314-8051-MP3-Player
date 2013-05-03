@@ -14,7 +14,6 @@ TWI_CODE SEGMENT CODE
 	RSEG TWI_CODE
 
 PUBLIC _TWI_WRITE
-
 _TWI_WRITE:
 	setb SCL
 	setb SDA
@@ -31,11 +30,11 @@ _TWI_WRITE:
 	jnc exit
 	mov C, SDA
 	jnc exit
-next_byte:
 	clr SDA
-	mov bit_cnt, #8
 	mov delay_cnt, #3
 	acall delay
+next_byte:
+	mov bit_cnt, #8
 next_bit:
 	clr SCL
 	mov A, datavar
@@ -112,12 +111,11 @@ delay:
 	ret
 
 PUBLIC _TWI_READ
-
 _TWI_READ:
 	setb SCL
 	setb SDA
 	mov A, R7		;device_addr
-	setb C			;1 in R/W bit
+	clr C			;0 in R/W bit
 	rlc A
 	mov datavar, A
 	mov A, R5
@@ -129,10 +127,57 @@ _TWI_READ:
 	jnc exit
 	mov C, SDA
 	jnc exit
-next_byte2:
-	mov temp, #0
+	clr SDA
+	mov delay_cnt, #3
+	acall delay
 	mov bit_cnt, #8
 next_bit2:
+	clr SCL
+	mov A, datavar
+	clr C
+	rlc A
+	mov datavar, A
+	mov SDA, C
+	mov A, #0
+	addc A, #0		;zero ACL
+	mov temp, A
+	mov delay_cnt, #3
+	acall delay
+	setb SCL
+	mov delay_cnt, #3
+	acall delay
+clock2:
+	mov C, SCL
+	jnc clock2
+	mov delay_cnt, #3
+	acall delay
+	mov A, temp
+	mov C, SDA
+	addc A, #0		;essentially XOR
+	anl A, #0x01		;bus busy error
+	jnz exit
+	djnz bit_cnt, next_bit2
+	mov delay_cnt, #3
+	acall delay
+	clr SCL
+	mov delay_cnt, #3
+	acall delay
+	setb SDA
+	mov delay_cnt, #3
+	acall delay
+	setb SCL
+	mov delay_cnt, #3
+	acall delay
+wait_ack2:
+	mov C, SCL
+	jnc wait_ack2
+	mov C, SDA
+	jnc next_byte3
+	ljmp exit
+next_byte3:
+	mov temp, #0
+	mov bit_cnt, #8
+next_bit3:
 	clr SCL
 	setb SDA
 	mov delay_cnt, #6
@@ -149,7 +194,7 @@ wait1:
 	mov temp, A
 	dec bit_cnt
 	mov A, bit_cnt
-	jz next_bit2
+	jz next_bit3
 	mov R0, p_data
 	mov A, temp
 	mov @R0, A
@@ -172,7 +217,7 @@ wait2:
 	jnc wait2
 	mov delay_cnt, #3
 	acall delay
-	sjmp next_byte2
+	sjmp next_byte3
 finish:
 	clr SCL
 	mov delay_cnt, #3
