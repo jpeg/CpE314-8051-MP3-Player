@@ -97,9 +97,9 @@ exit:
 	setb SCL
 	mov delay_cnt, #3
 	acall delay
-wait_something:
+wait_nack:
 	mov C, SCL
-	jnc wait_something
+	jnc wait_nack
 	mov delay_cnt, #3
 	acall delay
 	setb SDA
@@ -115,7 +115,7 @@ _TWI_READ:
 	setb SCL
 	setb SDA
 	mov A, R7		;device_addr
-	clr C			;0 in R/W bit
+	setb C			;0 in R/W bit
 	rlc A
 	mov datavar, A
 	mov A, R5
@@ -194,7 +194,7 @@ wait1:
 	mov temp, A
 	dec bit_cnt
 	mov A, bit_cnt
-	jz next_bit3
+	jnz next_bit3
 	mov R0, p_data
 	mov A, temp
 	mov @R0, A
@@ -211,10 +211,9 @@ wait1:
 	setb SCL
 	mov delay_cnt, #3
 	acall delay
-	sjmp wait2
-wait2:
+wait_ack3:
 	mov C, SCL
-	jnc wait2
+	jnc wait_ack3
 	mov delay_cnt, #3
 	acall delay
 	sjmp next_byte3
@@ -228,9 +227,9 @@ finish:
 	setb SCL
 	mov delay_cnt, #3
 	acall delay
-wait3:
+wait_nack2:
 	mov C, SCL
-	jnc wait3
+	jnc wait_nack2
 	mov delay_cnt, #3
 	lcall delay
 	mov R7, #0x00		;No error

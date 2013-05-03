@@ -70,8 +70,8 @@ void rtos_spin()
   uint8 error = 0;
   
   // Arrays from config.asm
-  extern uint8 code* CONFIG;
-  extern uint8 code* CONFIG2;
+  extern code uint8* CONFIG;
+  extern code uint8* CONFIG2;
   uint8 code* configPtr;
   uint8 idata temp[2];
   
@@ -84,11 +84,9 @@ void rtos_spin()
     error = twi_read(0x43, 1, array2);
   } while(error != 0);
   uart_hex8(array2[0]);
-  if(error != 0)
-    redLED = 0;
   
   // Send STAO13 config file
-  /*configPtr = CONFIG;
+  configPtr = CONFIG;
   while(*configPtr != 0xFF)
   {
     temp[0] = *configPtr;
@@ -110,7 +108,7 @@ void rtos_spin()
     temp[1] = *configPtr;
     configPtr++;
     error = twi_write(0x43, 2, temp);
-  }*/
+  }
   
   while(spin);
   {
