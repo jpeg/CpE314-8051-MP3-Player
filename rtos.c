@@ -64,7 +64,18 @@ void rtos_init(void)
 void rtos_spin()
 {
   bit spin = 1;
+  uint8 idata array[1] = {0x01};
   uint8 error = 0;
+  redLED=0;
+  do
+  {
+    error = twi_write(0x43, 1, array); 
+  } while(error != 0);redLED=1;greenLED=0;
+  do
+  {
+    error = twi_read(0x43, 1, array);
+  } while(error != 0);greenLED=1;
+  uart_hex8(array[0]);
   
   while(spin);
   {

@@ -1,7 +1,5 @@
-;#include <regAT89C51RC2.inc>
-
-SCL BIT 0xB4
-SDA BIT 0xB5
+SCL BIT 0xB4 ;P3^4
+SDA BIT 0xB5 ;P3^5
 
 VARS SEGMENT DATA OVERLAYABLE
 	RSEG VARS
@@ -12,8 +10,9 @@ VARS SEGMENT DATA OVERLAYABLE
 	bit_cnt: ds 1
 	delay_cnt: ds 1
 
-TWI_WRITE_CODE SEGMENT CODE
-	RSEG TWI_WRITE_CODE
+TWI_CODE SEGMENT CODE
+	RSEG TWI_CODE
+
 PUBLIC _TWI_WRITE
 
 _TWI_WRITE:
@@ -74,9 +73,6 @@ clock1:
 	setb SCL
 	mov delay_cnt, #3
 	acall delay
-	sjmp wait_ack
-exit:
-	ret				;here for sjmp range limits
 wait_ack:
 	mov C, SCL
 	jnc wait_ack
@@ -84,13 +80,15 @@ wait_ack:
 	jc exit
 	;dec num			;??? why two dec?
 	mov A, num
-	mov R7, 0x00
+	mov R7, #0x00		;No error
 	jz exit
 	dec num
 	mov R0, p_data
 	mov A, @R0
+	mov datavar, A
 	inc p_data
 	sjmp next_byte
+exit:
 	clr SCL
 	mov delay_cnt, #3
 	acall delay
@@ -106,15 +104,13 @@ wait_something:
 	mov delay_cnt, #3
 	acall delay
 	setb SDA
-	sjmp exit
+	ret
 
 delay:
 	nop
 	djnz delay_cnt, delay
 	ret
 
-TWI_READ_CODE SEGMENT CODE
-	RSEG TWI_READ_CODE
 PUBLIC _TWI_READ
 
 _TWI_READ:
@@ -130,7 +126,7 @@ _TWI_READ:
 	mov p_data, A
 	mov R7, #0x01		;bus busy error
 	mov C, SCL
-	jnc exit2
+	jnc exit
 	mov C, SDA
 	jnc exit
 next_byte2:
@@ -171,8 +167,6 @@ wait1:
 	mov delay_cnt, #3
 	acall delay
 	sjmp wait2
-exit2:				;here for sjmp range limits
-	ret
 wait2:
 	mov C, SCL
 	jnc wait2
@@ -185,28 +179,16 @@ finish:
 	acall delay
 	setb SDA
 	mov delay_cnt, #3
-	lcall delay
+	acall delay
 	setb SCL
 	mov delay_cnt, #3
-	lcall delay
+	acall delay
 wait3:
 	mov C, SCL
 	jnc wait3
 	mov delay_cnt, #3
 	lcall delay
-	clr SCL
-	mov delay_cnt, #3
-	lcall delay
-	clr SDA
-	mov delay_cnt, #3
-	acall delay
-	setb SCL
-	mov delay_cnt, #3
-	lcall delay
-wait4:
-	mov C, SCL
-	jnc wait4
-	setb SDA
-	sjmp exit2
+	mov R7, #0x00		;No error
+	ljmp exit
 
 END
