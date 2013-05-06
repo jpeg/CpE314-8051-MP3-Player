@@ -77,7 +77,7 @@ void rtos_spin()
   
   // Reset
   mp3_reset = 0;
-  for(i=0; i<50; i++);
+  for(i=0; i<80; i++);
   mp3_reset = 1;
   
   do
