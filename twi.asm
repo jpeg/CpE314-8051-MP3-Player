@@ -31,7 +31,7 @@ _TWI_WRITE:
 	mov C, SDA
 	jnc exit
 	clr SDA
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 next_byte:
 	mov bit_cnt, #8
@@ -45,15 +45,15 @@ next_bit:
 	mov A, #0
 	addc A, #0		;zero ACL
 	mov temp, A
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 	setb SCL
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 clock1:
 	mov C, SCL
 	jnc clock1
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 	mov A, temp
 	mov C, SDA
@@ -61,16 +61,16 @@ clock1:
 	anl A, #0x01		;bus busy error
 	jnz exit
 	djnz bit_cnt, next_bit
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 	clr SCL
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 	setb SDA
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 	setb SCL
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 wait_ack:
 	mov C, SCL
@@ -89,18 +89,18 @@ wait_ack:
 	sjmp next_byte
 exit:
 	clr SCL
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 	clr SDA
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 	setb SCL
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 wait_nack:
 	mov C, SCL
 	jnc wait_nack
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 	setb SDA
 	ret
@@ -128,7 +128,7 @@ _TWI_READ:
 	mov C, SDA
 	jnc exit
 	clr SDA
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 	mov bit_cnt, #8
 next_bit2:
@@ -141,15 +141,15 @@ next_bit2:
 	mov A, #0
 	addc A, #0		;zero ACL
 	mov temp, A
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 	setb SCL
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 clock2:
 	mov C, SCL
 	jnc clock2
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 	mov A, temp
 	mov C, SDA
@@ -157,16 +157,16 @@ clock2:
 	anl A, #0x01		;bus busy error
 	jnz exit
 	djnz bit_cnt, next_bit2
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 	clr SCL
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 	setb SDA
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 	setb SCL
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 wait_ack2:
 	mov C, SCL
@@ -180,10 +180,10 @@ next_byte3:
 next_bit3:
 	clr SCL
 	setb SDA
-	mov delay_cnt, #6
+	mov delay_cnt, #8
 	acall delay
 	setb SCL
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 wait1:
 	mov C, SCL
@@ -203,34 +203,34 @@ wait1:
 	mov A, num
 	jz finish
 	clr SCL
-	mov delay_cnt, #6
+	mov delay_cnt, #8
 	acall delay
 	clr SDA
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 	setb SCL
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 wait_ack3:
 	mov C, SCL
 	jnc wait_ack3
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 	sjmp next_byte3
 finish:
 	clr SCL
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 	setb SDA
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 	setb SCL
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	acall delay
 wait_nack2:
 	mov C, SCL
 	jnc wait_nack2
-	mov delay_cnt, #3
+	mov delay_cnt, #4
 	lcall delay
 	mov R7, #0x00		;No error
 	ljmp exit
