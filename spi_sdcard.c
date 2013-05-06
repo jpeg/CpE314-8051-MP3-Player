@@ -25,13 +25,13 @@ void spi_sdcard_init(void)
   }
   
   // Send CMD0
-  spi_sdcard_command(0, 0);
+  spi_sdcard_command(0, 0, SDCARD);
   error = spi_sdcard_response(1, response);
   
   // Send CMD8
   if(error == 0)
   {
-    spi_sdcard_command(8, 0x000001AA);
+    spi_sdcard_command(8, 0x000001AA, SDCARD);
     error = spi_sdcard_response(5, response);
     /* Disabled for code size
     if(error == 0)
@@ -44,7 +44,7 @@ void spi_sdcard_init(void)
   // Send CMD58
   if(error == 0)
   {
-    spi_sdcard_command(58, 0);
+    spi_sdcard_command(58, 0, SDCARD);
     error = spi_sdcard_response(5, response);
     /* Disabled for code size
     if(error == 0 && (response[2] & 0x30) != 0x30)
@@ -54,21 +54,21 @@ void spi_sdcard_init(void)
   // Send ACMD41
   while(response[0] != 0x00 && error == 0) //until active state
   {
-    spi_sdcard_command(55, 0);
+    spi_sdcard_command(55, 0, SDCARD);
     error = spi_sdcard_response(1, response);
-    spi_sdcard_command(41, 0x40000000);
+    spi_sdcard_command(41, 0x40000000, SDCARD);
     error = spi_sdcard_response(1, response);
   }
   
   // Send CMD58
   if(error == 0)
   {
-    spi_sdcard_command(58, 0);
+    spi_sdcard_command(58, 0, SDCARD);
     error = spi_sdcard_response(5, response);
     if(error == 0 && (response[1] & 0x40) != 0x40)
     {
       // Standard capacity card
-      spi_sdcard_command(16, 512);
+      spi_sdcard_command(16, 512, SDCARD);
       error = spi_sdcard_response(1, response);
       spi_sdcard_standardCapacity = 1;
     }
@@ -77,14 +77,14 @@ void spi_sdcard_init(void)
   // Send CMD9
   if(error == 0)
   {
-    spi_sdcard_command(9, 0);
+    spi_sdcard_command(9, 0, SDCARD);
     error = spi_sdcard_block(16, response);
   }
   
   // Send CMD10
   if(error == 0)
   {
-    spi_sdcard_command(10, 0);
+    spi_sdcard_command(10, 0, SDCARD);
     error = spi_sdcard_block(16, response);
   }
   
@@ -97,7 +97,7 @@ void spi_sdcard_init(void)
   }
 }
 
-void spi_sdcard_command(uint8 cmd, uint32 arg)
+void spi_sdcard_command(uint8 cmd, uint32 arg, bit device)
 {
   uint8 checkSum = 0x01;
   
@@ -117,7 +117,7 @@ void spi_sdcard_command(uint8 cmd, uint32 arg)
   cmd &= 0x7F;
   cmd |= 0x40;
   
-  nCS = 0;
+  nCS = device;
   SPDAT = cmd;
   while((SPSTA & 0x80) != 0x80);
   SPDAT = arg >> 24;
@@ -130,6 +130,9 @@ void spi_sdcard_command(uint8 cmd, uint32 arg)
   while((SPSTA & 0x80) != 0x80);
   SPDAT = checkSum;
   while((SPSTA & 0x80) != 0x80);
+  
+  if(device == MP3)
+    nCS = ~device;
   
   greenLED = 1;
 }

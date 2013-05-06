@@ -75,6 +75,11 @@ void rtos_spin()
   uint8 code* configPtr;
   uint8 idata temp[2];
   
+  // Reset
+  mp3_reset = 0;
+  for(i=0; i<50; i++);
+  mp3_reset = 1;
+  
   do
   {
     error = twi_write(0x43, 1, array); 

@@ -11,9 +11,12 @@
 #include "ports.h"
 #include "uart.h"
 
+#define SDCARD 0
+#define MP3 1
+
 void spi_sdcard_init(void);
 
-void spi_sdcard_command(uint8 cmd, uint32 arg);
+void spi_sdcard_command(uint8 cmd, uint32 arg, bit device);
 
 uint8 spi_sdcard_response(uint8 numBytes, uint8* buffer);
 
