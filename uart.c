@@ -59,7 +59,7 @@ void uart_hex8(uint8 c)
   uart_print(result, 3);
 }
 
-void uart_hex32(uint32 byte)
+/*void uart_hex32(uint32 byte)
 {
   uint8 result[9];
   uint8 i;
@@ -112,4 +112,4 @@ void uart_dump(uint8* block, uint16 bytes)
   }
   
   uart_print("\n\r", 2);
-}
+}*/

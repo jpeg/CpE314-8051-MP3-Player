@@ -65,7 +65,7 @@ void rtos_spin()
 {
   bit spin = 1;
   uint8 idata array[1] = {0x01};
-  uint8 idata array2[1] = {0x7E};
+  uint32 idata fileCluster;
   uint8 i;
   uint8 error = 0;
   
@@ -86,9 +86,11 @@ void rtos_spin()
   } while(error != 0);
   do
   {
-    error = twi_read(0x43, 1, array2);
+    error = twi_read(0x43, 1, array);
   } while(error != 0);
-  uart_hex8(array2[0]);
+  uart_hex8(array[0]);
+  if(array[0] != 0xAC)
+  	redLED = 0;
   
   // Send STAO13 config file
   configPtr = CONFIG;
@@ -102,7 +104,7 @@ void rtos_spin()
   }
   
   // Pause
-  for(i=0; i<50; ++i);
+  for(i=0; i<80; ++i);
   
   // Send second STAO13 config
   configPtr = CONFIG2;
@@ -115,7 +117,37 @@ void rtos_spin()
     error = twi_write(0x43, 2, temp);
   }
   
-  while(spin);
+  for(i=0; i<80; ++i);
+  
+  fileCluster = fs_findMP3(2);
+  if(fileCluster == 0)
+  {
+    amberLED = 0;
+    greenLED = 0;
+    uart_print("ERROR: No MP3 in root\n\r", 23);
+  }
+  else
+  {
+    uart_print("Found MP3\n\r", 11);
+    
+    // Load first sector
+    fs_loadSector(fileCluster, 0);
+    for(i=1; i<64; ++i)
+    {
+      // Send data to MP3 decoder
+      spi_mp3_data(512, fs_currentBuffer());
+      
+      // Load data from SD card
+      fs_swapBuffer();
+      fs_loadSector(fileCluster, i);
+      
+      // Wait for DATA_REQ
+      while(mp3_data_req == 0);
+      amberLED = ~amberLED;
+    }
+  }
+  
+  while(spin)
   {
   }
 }

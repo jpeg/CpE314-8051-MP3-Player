@@ -19,13 +19,13 @@ void fs_init();
 
 uint32 fs_FATentry(const uint32 cluster);
 
-//void fs_listDirectoryEntries(const uint32 startCluster);
+uint32 fs_findMP3(const uint32 startCluster);
 
-//uint32 fs_findChoice(const uint32 startCluster, const uint8 choice);
-
-//void fs_printFile(uint32 cluster);
+void fs_loadSector(uint32 cluster, uint8 relativeSector);
 
 void fs_swapBuffer();
+
+uint8 xdata* fs_currentBuffer();
 
 // Utility functions
 uint8 read8(uint16 offset, uint8 xdata* array);

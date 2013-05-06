@@ -39,8 +39,8 @@ void fs_init()
     else // Master boot record, locate the boot sector
       fs_FATrelativeSectors = read32(0x01C6, fs_buffer);
     //uart_print("Boot Sector ", 12);
-    uart_hex32(fs_FATrelativeSectors);
-    uart_print("\n\r", 2);
+    //uart_hex32(fs_FATrelativeSectors);
+    //uart_print("\n\r", 2);
   }
   
   // Read boot sector
@@ -110,15 +110,14 @@ uint32 fs_FATentry(const uint32 cluster)
   return read32(FATentryOffset, fs_buffer) & (fs_FAToffset == FAT32 ? 0xFFFF : 0x0FFFFFFF);
 }
 
-/*void fs_listDirectoryEntries(const uint32 startCluster)
+uint32 fs_findMP3(const uint32 startCluster)
 {
   uint32 idata cluster = startCluster;
   uint8 idata relativeSector = 0;
   uint16 idata relativeEntry = 0;
-  bit longFilename = 0;
   uint8 idata entryCount = 0;
+  uint32 idata entryCluster;
   uint8 idata byte;
-  uint8 idata i;
    
   while(cluster != 0x0FFFFFFF && cluster != 0x0000FFFF)
   {
@@ -138,32 +137,16 @@ uint32 fs_FATentry(const uint32 cluster)
         
         switch(read8(relativeEntry + 11, fs_buffer))
         {
-        case 0x0F: // Long filename
-        case 0x1F:
-        case 0x2F:
-          longFilename = 1;
-          // Ignore long filenames for now
-          break;
-          
         case 0x00: // File
-        case 0x20: // Archive
-          uart_hex8(entryCount++);
-          uart_print(")     ", 6);
-          for(i=0; i<8 && *(fs_buffer+relativeEntry+i) != ' '; ++i)
-            uart_print(fs_buffer + relativeEntry + i, 1);
-          uart_print(".", 1);
-          uart_print(fs_buffer + relativeEntry + 8, 3);
-          uart_print("\n\r", 2);
-          longFilename = 0;
+          if(fs_buffer + relativeEntry + 8 == 'M')
+          {
+            entryCluster = read16(0x1A, fs_buffer);
+            if(fs_FAToffset == FAT32)
+              entryCluster |= read16(0x14, fs_buffer) << 8;
+            return entryCluster;
+          }
           break;
-          
-        case 0x10: // Directory
-          uart_hex8(entryCount++);
-          uart_print(") DIR ", 6);
-          uart_print(fs_buffer + relativeEntry, 11);
-          uart_print("\n\r", 2);
-          break;
-          
+        
         default:
           break;
         }
@@ -180,114 +163,18 @@ uint32 fs_FATentry(const uint32 cluster)
     cluster = fs_FATentry(cluster);
     relativeSector = 0;
   }
-}
-
-uint32 fs_findChoice(const uint32 startCluster, const uint8 choice)
-{
-  uint32 idata cluster = startCluster;
-  uint8 idata relativeSector = 0;
-  uint16 idata relativeEntry = 0;
-  uint8 idata entryCount = 0;
-  uint8 idata byte;
-  uint32 idata returnVal = 0x00000000;
-  uint32 idata entryCluster;
-  bit notDone = 1;
-   
-  while(cluster != 0x0FFFFFFF && cluster != 0x0000FFFF && notDone)
-  {
-    while(relativeSector < fs_FATsectorsPerCluster && notDone)
-    {
-      // Load sector
-      spi_sdcard_command(17, (cluster-2)*fs_FATsectorsPerCluster + relativeSector + fs_FATfirstDataSector);
-      spi_sdcard_block(512, fs_buffer);
-      
-      while(relativeEntry < 512 && notDone)
-      {
-        byte = read8(relativeEntry, fs_buffer);
-        if(byte == 0x00)
-          break;
-        if(byte == 0xE0)
-          continue;
-        
-        entryCluster = read16(0x1A, fs_buffer);
-        if(fs_FAToffset == FAT32)
-          entryCluster |= read16(0x14, fs_buffer) << 8;
-        
-        byte = read8(relativeEntry + 11, fs_buffer);
-        if(byte == 0x00 || byte == 0x20) // File or archive
-        {
-          entryCount++;
-          if(entryCount == choice)
-          {
-            fs_printFile(entryCluster);
-            notDone = 0;
-          }
-        }
-        else if(byte == 0x10) // Directory
-        {
-          entryCount++;
-          if(entryCount == choice)
-          {
-            returnVal = entryCluster;
-            notDone = 0;
-          }
-        }
-        
-        relativeEntry += 32;
-      }
-      if(byte == 0x00)
-        break;
-      
-      relativeSector++;
-      relativeEntry = 0;
-    }
-    
-    cluster = fs_FATentry(cluster);
-    relativeSector = 0;
-  }
   
-  return returnVal;
+  return 0;
 }
 
-void fs_printFile(uint32 cluster)
+void fs_loadSector(uint32 cluster, uint8 relativeSector)
 {
-  uint8 idata relativeSector = 0;
   bit notDone = 1;
-  uint8 byte;
-   
-  while(cluster != 0x0FFFFFFF && cluster != 0x0000FFFF && notDone)
-  {
-    while(relativeSector < fs_FATsectorsPerCluster && notDone)
-    {
-      // Load sector
-      spi_sdcard_command(17, (cluster-2)*fs_FATsectorsPerCluster + relativeSector + fs_FATfirstDataSector);
-      spi_sdcard_block(512, fs_buffer);
-      
-      //uart_print("Cluster ", 8);
-      //uart_hex32(cluster);
-      uart_print(" Sector ", 8);
-      uart_hex32((cluster-2)*fs_FATsectorsPerCluster + relativeSector + fs_FATfirstDataSector);
-      uart_print("\n\r", 2);
-      
-      uart_dump(fs_buffer, 512);
-      
-      uart_print("Press 'q' to quit, any other key to continue", 44);
-      while(!RI);
-      RI = 0;
-      byte = SBUF;
-      uart_print(&byte, 1);
-      uart_print("\n\r\n\r", 4);
-        
-      if(byte == 'q')
-        notDone = 0;
-
-      relativeSector++;
-    }
-    
-    cluster = fs_FATentry(cluster);
-    relativeSector = 0;
-  }
-}*/
+  
+  // Load sector
+  spi_sdcard_command(17, (cluster-2)*fs_FATsectorsPerCluster + relativeSector + fs_FATfirstDataSector);
+  spi_sdcard_block(512, fs_buffer);
+}
 
 void fs_swapBuffer()
 {
@@ -295,6 +182,11 @@ void fs_swapBuffer()
     fs_buffer = &fs_sdBuffer2;
   else
     fs_buffer = &fs_sdBuffer1;
+}
+
+uint8 xdata* fs_currentBuffer()
+{
+  return fs_buffer;
 }
 
 uint8 read8(uint16 offset, uint8 xdata* array)
