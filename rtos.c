@@ -80,6 +80,7 @@ void rtos_spin()
   for(i=0; i<80; i++);
   mp3_reset = 1;
   
+  // Test TWI
   do
   {
     error = twi_write(0x43, 1, array); 
@@ -88,7 +89,6 @@ void rtos_spin()
   {
     error = twi_read(0x43, 1, array);
   } while(error != 0);
-  uart_hex8(array[0]);
   if(array[0] != 0xAC)
   	redLED = 0;
   
@@ -143,8 +143,9 @@ void rtos_spin()
       
       // Wait for DATA_REQ
       while(mp3_data_req == 0);
-      amberLED = ~amberLED;
+      yellowLED = ~yellowLED;
     }
+    yellowLED = 1;
   }
   
   while(spin)

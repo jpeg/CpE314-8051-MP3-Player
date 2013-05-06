@@ -135,20 +135,15 @@ uint32 fs_findMP3(const uint32 startCluster)
         if(byte == 0xE0)
           continue;
         
-        switch(read8(relativeEntry + 11, fs_buffer))
+        if(read8(relativeEntry + 11, fs_buffer) & 0x20)
         {
-        case 0x00: // File
-          if(fs_buffer + relativeEntry + 8 == 'M')
+          if(read8(relativeEntry + 8, fs_buffer) == 'M') //close enough
           {
             entryCluster = read16(0x1A, fs_buffer);
             if(fs_FAToffset == FAT32)
               entryCluster |= read16(0x14, fs_buffer) << 8;
             return entryCluster;
           }
-          break;
-        
-        default:
-          break;
         }
         
         relativeEntry += 32;

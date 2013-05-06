@@ -16,8 +16,10 @@ void spi_sdcard_init(void)
   
   SPCON = 0x73;
   
-  // Send 72 clock pulses
   nCS = 1;
+  mp3_enable = 0;
+  
+  // Send 72 clock pulses
   for(i=0; i<71; ++i)
   {
     SPDAT = 0xFF;
@@ -117,7 +119,7 @@ void spi_sdcard_command(uint8 cmd, uint32 arg)
   cmd &= 0x7F;
   cmd |= 0x40;
   
-  nCS = SDCARD;
+  nCS = 0;
   SPDAT = cmd;
   while((SPSTA & 0x80) != 0x80);
   SPDAT = arg >> 24;
@@ -179,7 +181,7 @@ uint8 spi_sdcard_response(uint8 numBytes, uint8 idata* buffer)
   SPDAT = 0xFF;
   while((SPSTA & 0x80) != 0x80);
   
-  nCS = ~SDCARD;
+  nCS = 1;
   amberLED = 1;
   
   return error;
@@ -242,7 +244,7 @@ uint8 spi_sdcard_block(uint16 numBytes, uint8* buffer)
   else
     error = 1;
   
-  nCS = ~SDCARD;
+  nCS = 1;
   amberLED = 1;
   
   return error;
@@ -253,7 +255,7 @@ void spi_mp3_data(uint16 numBytes, uint8 xdata* buffer)
   uint16 i;
   
   greenLED = 0;
-  mp3_enable = MP3;
+  mp3_enable = 1;
   
   for(i=0; i<numBytes; i++)
   {
@@ -261,6 +263,6 @@ void spi_mp3_data(uint16 numBytes, uint8 xdata* buffer)
     while((SPSTA & 0x80) != 0x80);
   }
   
-  mp3_enable = ~MP3;
+  mp3_enable = 0;
   greenLED = 1;
 }
