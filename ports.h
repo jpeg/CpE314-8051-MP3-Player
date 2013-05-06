@@ -19,6 +19,7 @@ sbit yellowLED = P2^5;
 sbit amberLED = P2^6;
 sbit greenLED = P2^7;
 
+sbit mp3_enable = P1^3;
 sbit mp3_twi_scl = P3^4;
 sbit mp3_twi_sda = P3^5;
 sbit mp3_reset = P3^6;

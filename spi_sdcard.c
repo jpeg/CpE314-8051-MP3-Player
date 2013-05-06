@@ -10,9 +10,9 @@ static bit spi_sdcard_standardCapacity = 0;
 
 void spi_sdcard_init(void)
 {
-  uint8 i, response[16];
-  uint32* response32 = &response[1];
-  uint8 error = 0;
+  uint8 idata i, response[16];
+  uint32 idata* response32 = &response[1];
+  uint8 idata error = 0;
   
   SPCON = 0x73;
   
@@ -25,13 +25,13 @@ void spi_sdcard_init(void)
   }
   
   // Send CMD0
-  spi_sdcard_command(0, 0, SDCARD);
+  spi_sdcard_command(0, 0);
   error = spi_sdcard_response(1, response);
   
   // Send CMD8
   if(error == 0)
   {
-    spi_sdcard_command(8, 0x000001AA, SDCARD);
+    spi_sdcard_command(8, 0x000001AA);
     error = spi_sdcard_response(5, response);
     /* Disabled for code size
     if(error == 0)
@@ -44,7 +44,7 @@ void spi_sdcard_init(void)
   // Send CMD58
   if(error == 0)
   {
-    spi_sdcard_command(58, 0, SDCARD);
+    spi_sdcard_command(58, 0);
     error = spi_sdcard_response(5, response);
     /* Disabled for code size
     if(error == 0 && (response[2] & 0x30) != 0x30)
@@ -54,21 +54,21 @@ void spi_sdcard_init(void)
   // Send ACMD41
   while(response[0] != 0x00 && error == 0) //until active state
   {
-    spi_sdcard_command(55, 0, SDCARD);
+    spi_sdcard_command(55, 0);
     error = spi_sdcard_response(1, response);
-    spi_sdcard_command(41, 0x40000000, SDCARD);
+    spi_sdcard_command(41, 0x40000000);
     error = spi_sdcard_response(1, response);
   }
   
   // Send CMD58
   if(error == 0)
   {
-    spi_sdcard_command(58, 0, SDCARD);
+    spi_sdcard_command(58, 0);
     error = spi_sdcard_response(5, response);
     if(error == 0 && (response[1] & 0x40) != 0x40)
     {
       // Standard capacity card
-      spi_sdcard_command(16, 512, SDCARD);
+      spi_sdcard_command(16, 512);
       error = spi_sdcard_response(1, response);
       spi_sdcard_standardCapacity = 1;
     }
@@ -77,14 +77,14 @@ void spi_sdcard_init(void)
   // Send CMD9
   if(error == 0)
   {
-    spi_sdcard_command(9, 0, SDCARD);
+    spi_sdcard_command(9, 0);
     error = spi_sdcard_block(16, response);
   }
   
   // Send CMD10
   if(error == 0)
   {
-    spi_sdcard_command(10, 0, SDCARD);
+    spi_sdcard_command(10, 0);
     error = spi_sdcard_block(16, response);
   }
   
@@ -97,7 +97,7 @@ void spi_sdcard_init(void)
   }
 }
 
-void spi_sdcard_command(uint8 cmd, uint32 arg, bit device)
+void spi_sdcard_command(uint8 cmd, uint32 arg)
 {
   uint8 checkSum = 0x01;
   
@@ -117,7 +117,7 @@ void spi_sdcard_command(uint8 cmd, uint32 arg, bit device)
   cmd &= 0x7F;
   cmd |= 0x40;
   
-  nCS = device;
+  nCS = SDCARD;
   SPDAT = cmd;
   while((SPSTA & 0x80) != 0x80);
   SPDAT = arg >> 24;
@@ -131,13 +131,10 @@ void spi_sdcard_command(uint8 cmd, uint32 arg, bit device)
   SPDAT = checkSum;
   while((SPSTA & 0x80) != 0x80);
   
-  if(device == MP3)
-    nCS = ~device;
-  
   greenLED = 1;
 }
 
-uint8 spi_sdcard_response(uint8 numBytes, uint8* buffer)
+uint8 spi_sdcard_response(uint8 numBytes, uint8 idata* buffer)
 {
   uint8 in, i;
   uint8* current; 
@@ -182,7 +179,7 @@ uint8 spi_sdcard_response(uint8 numBytes, uint8* buffer)
   SPDAT = 0xFF;
   while((SPSTA & 0x80) != 0x80);
   
-  nCS = 1;
+  nCS = ~SDCARD;
   amberLED = 1;
   
   return error;
@@ -245,9 +242,25 @@ uint8 spi_sdcard_block(uint16 numBytes, uint8* buffer)
   else
     error = 1;
   
-  nCS = 1;
+  nCS = ~SDCARD;
   amberLED = 1;
   
   return error;
 }
 
+void spi_mp3_data(uint16 numBytes, uint8 xdata* buffer)
+{
+  uint16 i;
+  
+  greenLED = 0;
+  mp3_enable = MP3;
+  
+  for(i=0; i<numBytes; i++)
+  {
+    SPDAT = buffer[i];
+    while((SPSTA & 0x80) != 0x80);
+  }
+  
+  mp3_enable = ~MP3;
+  greenLED = 1;
+}

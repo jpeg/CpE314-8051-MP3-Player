@@ -30,7 +30,7 @@ void fs_init()
   
   fs_buffer = &fs_sdBuffer1;
   
-  spi_sdcard_command(17, 0, SDCARD);
+  spi_sdcard_command(17, 0);
   error = spi_sdcard_block(512, fs_buffer);
   if(error == 0)
   {
@@ -45,7 +45,7 @@ void fs_init()
   
   // Read boot sector
   fs_swapBuffer();
-  spi_sdcard_command(17, fs_FATrelativeSectors, SDCARD);
+  spi_sdcard_command(17, fs_FATrelativeSectors);
   error = spi_sdcard_block(512, fs_buffer);
   if(error == 0)
   {
@@ -104,7 +104,7 @@ uint32 fs_FATentry(const uint32 cluster)
   FATsectorNumber = fs_FATreservedSectorCount + (cluster << fs_FAToffset) / 512 + fs_FATrelativeSectors;
   FATentryOffset = (cluster << fs_FAToffset) % 512;
   
-  spi_sdcard_command(17, FATsectorNumber, SDCARD);
+  spi_sdcard_command(17, FATsectorNumber);
   spi_sdcard_block(512, fs_buffer);
   
   return read32(FATentryOffset, fs_buffer) & (fs_FAToffset == FAT32 ? 0xFFFF : 0x0FFFFFFF);
