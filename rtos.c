@@ -6,10 +6,7 @@
 
 #include "rtos.h"
 
-static uint8 rtos_numTasks;
-static task_type idata rtos_tasks[RTOS_MAX_NUM_TASKS];
-static uint16 idata rtos_taskCounts[RTOS_MAX_NUM_TASKS];
-static uint16 idata rtos_taskCounters[RTOS_MAX_NUM_TASKS];
+static uint8 rtos_state;
 
 void rtos_init(void)
 {
@@ -18,7 +15,7 @@ void rtos_init(void)
   uint8 reloadLow;
   
 	// Tick rate (1 ms)
-  reload = (uint16)(65536UL - (OSC_FREQ/1000) / (uint32)OSC_PER_INST);
+  reload = (uint16)(65536UL - (uint32)TICK_MS * (OSC_FREQ/1000) / (uint32)OSC_PER_INST);
   reloadHigh = (uint8)(reload / 256);
   reloadLow = (uint8)(reload % 256);
   
@@ -43,23 +40,12 @@ void rtos_init(void)
   
   EA = 1;
   
-  rtos_numTasks = 0;
+  rtos_state = RTOS_WAIT_DR;
   
   uart_init();
   spi_sdcard_init();
   fs_init();
 }
-
-/*void rtos_task(task_type task, uint16 msec)
-{
-  rtos_tasks[rtos_numTasks] = task;
-  if(msec > 0)
-    rtos_taskCounts[rtos_numTasks] = msec;
-  else
-    rtos_taskCounts[rtos_numTasks] = 1;
-  rtos_taskCounters[rtos_numTasks] = 1;
-  rtos_numTasks++;
-}*/
 
 void rtos_spin()
 {
@@ -150,22 +136,33 @@ void rtos_spin()
   
   while(spin)
   {
+    // Sleep until next interrupt
+    PCON |= 0x01;
   }
 }
 
-/*void rtos_tick_ISR(void) interrupt 5 using 3
+void rtos_tick_ISR(void) interrupt 5 using 3
 {
-  uint8 currentTask;
-  
 	TF2 = 0;
 
-  // Run all tasks
-	for(currentTask=0; currentTask<rtos_numTasks; ++currentTask)
+  switch(rtos_state)
   {
-    if(--rtos_taskCounters[currentTask] == 0)
-    {
-      rtos_tasks[currentTask]();
-      rtos_taskCounters[currentTask] = rtos_taskCounts[currentTask];
-    }
+  case RTOS_WAIT_DR:
+    break;
+  case RTOS_READ_FAT:
+    break;
+  case RTOS_READ_BUF:
+    break;
+  case RTOS_SEND_DATA:
+    break;
+  case RTOS_CHECK_MEM:
+    break;
+  case RTOS_READ_SEC:
+    break;
+  case RTOS_NEXT_CLUS:
+    break;
+  default:
+    rtos_state = RTOS_WAIT_DR;
+    break;
   }
-}*/
+}

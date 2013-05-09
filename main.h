@@ -15,6 +15,7 @@ sfr SPDAT = 0xC5;
 
 #define OSC_FREQ (18432000UL) //(11059200UL)
 #define OSC_PER_INST (6)
+#define TICK_MS (12)
 #define BAUDRATE (9600UL)
 typedef unsigned char uint8;
 typedef unsigned int uint16;

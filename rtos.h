@@ -16,19 +16,22 @@
 #include "twi.h"
 #include "filesystem.h"
 
-#define RTOS_MAX_NUM_TASKS (2)
-typedef void (*task_type)(void);
+#define RTOS_WAIT_DR    0
+#define RTOS_READ_FAT   1
+#define RTOS_READ_BUF   2
+#define RTOS_SEND_DATA  3
+#define RTOS_CHECK_MEM  4
+#define RTOS_READ_SEC   5
+#define RTOS_NEXT_CLUS  6
+#define RTOS_LOCATE_SEC 7
 
 // Initalize the RT OS
 void rtos_init(void);
-
-// Add an application to be run, msec sets how many milliseconds between runs
-//void rtos_task(task_type task, uint16 msec);
 
 // Run the background print to serial task
 void rtos_spin();
 
 // Runs applications each tick, uses timer2
-//void rtos_tick_ISR(void);
+void rtos_tick_ISR(void);
 
 #endif //RTOS_H
