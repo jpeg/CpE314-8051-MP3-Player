@@ -148,7 +148,10 @@ void rtos_tick_ISR(void) interrupt 5 using 3
       }
     }
     if(mp3_data_req == 0)
+    {
+      redLED=~redLED;
       song = 1;
+    }
     yellowLED = ~yellowLED;
     rtos_state = RTOS_CHECK_MEM;
     break;
