@@ -9,7 +9,7 @@
 
 #include "main.h"
 #include "ports.h"
-#include "uart.h"
+//#include "uart.h"
 
 void spi_sdcard_init(void);
 

@@ -44,7 +44,7 @@ void fs_init()
   }
   
   // Read boot sector
-  fs_swapBuffer();
+  fs_setBuffer(1);
   spi_sdcard_command(17, fs_FATrelativeSectors);
   error = spi_sdcard_block(512, fs_buffer);
   if(error == 0)
@@ -54,15 +54,15 @@ void fs_init()
     {
       fs_FAToffset = FAT32;
       fs_FATsize = read32(0x0024, fs_buffer);
-      uart_print("FAT32", 5);
+      //uart_print("FAT32", 5);
     }
     else
     {
       fs_FAToffset = FAT16;
       fs_FATsize = read16(0x0016, fs_buffer);
-      uart_print("FAT16", 5);
+      //uart_print("FAT16", 5);
     }
-    uart_print("\n\r", 2);
+    //uart_print("\n\r", 2);
     
     fs_FATreservedSectorCount = read16(0x000E, fs_buffer);
     rootEntCnt = read16(0x0011, fs_buffer);
@@ -92,7 +92,7 @@ void fs_init()
     uart_print("\n\r", 2);*/
   }
   
-  uart_print("\n\r", 2);
+  //uart_print("\n\r", 2);
 }
 
 
@@ -108,6 +108,13 @@ uint32 fs_FATentry(const uint32 cluster)
   spi_sdcard_block(512, fs_buffer);
   
   return read32(FATentryOffset, fs_buffer) & (fs_FAToffset == FAT32 ? 0xFFFF : 0x0FFFFFFF);
+}
+
+bit fs_FATeof(const uint32 cluster)
+{
+  if(cluster == 0x0FFFFFFF || cluster == 0x0000FFFF)
+    return 1;
+  return 0;
 }
 
 uint32 fs_findMP3(const uint32 startCluster)
@@ -171,9 +178,9 @@ void fs_loadSector(uint32 cluster, uint8 relativeSector)
   spi_sdcard_block(512, fs_buffer);
 }
 
-void fs_swapBuffer()
+void fs_setBuffer(bit buffer)
 {
-  if(fs_buffer == &fs_sdBuffer1)
+  if(buffer)
     fs_buffer = &fs_sdBuffer2;
   else
     fs_buffer = &fs_sdBuffer1;

@@ -11,12 +11,11 @@
 
 #include "main.h"
 #include "ports.h"
-#include "uart.h"
+//#include "uart.h"
 #include "spi_sdcard.h"
 #include "twi.h"
 #include "filesystem.h"
 
-#define RTOS_WAIT_DR    0
 #define RTOS_READ_FAT   1
 #define RTOS_READ_BUF   2
 #define RTOS_SEND_DATA  3

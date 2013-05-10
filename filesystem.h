@@ -9,7 +9,7 @@
 
 #include "main.h"
 #include "spi_sdcard.h"
-#include "uart.h"
+//#include "uart.h"
 
 // Declare extern variables
 extern uint32 idata fs_FATfirstDataSector;
@@ -19,11 +19,13 @@ void fs_init();
 
 uint32 fs_FATentry(const uint32 cluster);
 
+bit fs_FATeof(const uint32 cluster);
+
 uint32 fs_findMP3(const uint32 startCluster);
 
 void fs_loadSector(uint32 cluster, uint8 relativeSector);
 
-void fs_swapBuffer();
+void fs_setBuffer(bit buffer);
 
 uint8 xdata* fs_currentBuffer();
 

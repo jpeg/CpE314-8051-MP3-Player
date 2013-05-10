@@ -7,12 +7,21 @@
 #include "rtos.h"
 
 static uint8 rtos_state;
+static uint32 startCluster;
 
 void rtos_init(void)
 {
   uint16 reload;
   uint8 reloadHigh;
   uint8 reloadLow;
+  
+  // Arrays from config.asm and other MP3 variables
+  extern code uint8* CONFIG;
+  extern code uint8* CONFIG2;
+  uint8 code* configPtr;
+  uint8 idata temp[2] = {0x01};
+  uint8 i;
+  uint8 error = 0;
   
 	// Tick rate (1 ms)
   reload = (uint16)(65536UL - (uint32)TICK_MS * (OSC_FREQ/1000) / (uint32)OSC_PER_INST);
@@ -38,30 +47,11 @@ void rtos_init(void)
   ET2 = 1;
   TR2 = 1;
   
-  EA = 1;
-  
-  rtos_state = RTOS_WAIT_DR;
-  
-  uart_init();
+  //uart_init();
   spi_sdcard_init();
   fs_init();
-}
-
-void rtos_spin()
-{
-  bit spin = 1;
-  uint8 idata array[1] = {0x01};
-  uint32 idata fileCluster;
-  uint8 i;
-  uint8 error = 0;
   
-  // Arrays from config.asm
-  extern code uint8* CONFIG;
-  extern code uint8* CONFIG2;
-  uint8 code* configPtr;
-  uint8 idata temp[2];
-  
-  // Reset
+  // Reset MP3
   mp3_reset = 0;
   for(i=0; i<80; i++);
   mp3_reset = 1;
@@ -69,13 +59,13 @@ void rtos_spin()
   // Test TWI
   do
   {
-    error = twi_write(0x43, 1, array); 
+    error = twi_write(0x43, 1, temp); 
   } while(error != 0);
   do
   {
-    error = twi_read(0x43, 1, array);
+    error = twi_read(0x43, 1, temp);
   } while(error != 0);
-  if(array[0] != 0xAC)
+  if(temp[0] != 0xAC)
   	redLED = 0;
   
   // Send STAO13 config file
@@ -103,36 +93,16 @@ void rtos_spin()
     error = twi_write(0x43, 2, temp);
   }
   
-  for(i=0; i<80; ++i);
+  startCluster = fs_findMP3(2);
   
-  fileCluster = fs_findMP3(2);
-  if(fileCluster == 0)
-  {
-    amberLED = 0;
-    greenLED = 0;
-    uart_print("ERROR: No MP3 in root\n\r", 23);
-  }
-  else
-  {
-    uart_print("Found MP3\n\r", 11);
-    
-    // Load first sector
-    fs_loadSector(fileCluster, 0);
-    for(i=1; i<64; ++i)
-    {
-      // Send data to MP3 decoder
-      spi_mp3_data(512, fs_currentBuffer());
-      
-      // Load data from SD card
-      fs_swapBuffer();
-      fs_loadSector(fileCluster, i);
-      
-      // Wait for DATA_REQ
-      while(mp3_data_req == 0);
-      yellowLED = ~yellowLED;
-    }
-    yellowLED = 1;
-  }
+  rtos_state = RTOS_CHECK_MEM;
+}
+
+void rtos_spin()
+{
+  bit spin = 1;
+  
+  EA = 1;
   
   while(spin)
   {
@@ -143,26 +113,98 @@ void rtos_spin()
 
 void rtos_tick_ISR(void) interrupt 5 using 3
 {
+  static bit song = 0;
+  static bit buf1 = 0;
+  static bit buf2 = 0;
+  static bit cluster = 0;
+  static bit currentBuf = 0;
+  static uint32 clusterNum = 0;
+  static uint8 relativeSector;
+  static uint16 currentByte = 0;
+  
 	TF2 = 0;
-
+  
+  if(clusterNum == 0) //temp
+    clusterNum = startCluster;
+  
   switch(rtos_state)
   {
-  case RTOS_WAIT_DR:
-    break;
-  case RTOS_READ_FAT:
-    break;
-  case RTOS_READ_BUF:
-    break;
   case RTOS_SEND_DATA:
+    fs_setBuffer(currentBuf);
+    while(mp3_data_req && (buf1 || buf2))
+    {
+      spi_mp3_data(1, fs_currentBuffer() + currentByte);
+      currentByte++;
+      if(currentByte == 512)
+      {
+        // Buffer empty, swap
+        if(currentBuf)
+          buf2 = 0;
+        else
+          buf1 = 0;
+        currentBuf = ~currentBuf;
+        fs_setBuffer(currentBuf);
+        currentByte = 0;
+      }
+    }
+    if(mp3_data_req == 0)
+      song = 1;
+    yellowLED = ~yellowLED;
+    rtos_state = RTOS_CHECK_MEM;
     break;
+  
   case RTOS_CHECK_MEM:
+    if(buf1 == 0 || buf2 == 0)
+    {
+      if(relativeSector == 64 || cluster == 0)
+      {
+        rtos_state = RTOS_NEXT_CLUS;
+        cluster = 0;
+      }
+      else
+        rtos_state = RTOS_READ_SEC;
+    }
+    else 
+      rtos_state = RTOS_SEND_DATA;
     break;
+  
   case RTOS_READ_SEC:
+    if(buf1 == 0)
+    {
+      fs_setBuffer(0);
+      buf1 = 1;
+    }
+    else if(buf2 == 0)
+    {
+      fs_setBuffer(1);
+      buf2 = 1;
+    }
+    
+    fs_loadSector(clusterNum, relativeSector);
+    relativeSector++;
+    
+    rtos_state = RTOS_SEND_DATA;
     break;
+  
   case RTOS_NEXT_CLUS:
+    clusterNum = fs_FATentry(clusterNum);
+    relativeSector = 0;
+    if(fs_FATeof(clusterNum))
+    {
+      song = 0;
+      EA = 0; //TODO new song, find start cluster
+    }
+    else
+      cluster = 1;
+    
+    if(song)
+      rtos_state = RTOS_SEND_DATA;
+    else
+      rtos_state = RTOS_READ_SEC;
     break;
+  
   default:
-    rtos_state = RTOS_WAIT_DR;
+    rtos_state = RTOS_SEND_DATA;
     break;
   }
 }
