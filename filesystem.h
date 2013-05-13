@@ -14,6 +14,7 @@
 // Declare extern variables
 extern uint32 idata fs_FATfirstDataSector;
 extern uint32 idata fs_FATsectorsPerCluster;
+extern uint8 xdata* fs_buffer;
 
 void fs_init();
 
@@ -26,8 +27,6 @@ uint32 fs_findMP3(const uint32 startCluster);
 void fs_loadSector(uint32 cluster, uint8 relativeSector);
 
 void fs_setBuffer(bit buffer);
-
-uint8 xdata* fs_currentBuffer();
 
 // Utility functions
 uint8 read8(uint16 offset, uint8 xdata* array);

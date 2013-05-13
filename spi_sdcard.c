@@ -95,7 +95,7 @@ void spi_sdcard_init(void)
     redLED = 0;
     /*uart_print("SD card error ", 15);
     uart_hex8(error);
-    uart_print("\n\r", 2);*/
+    uart_newline();*/
   }
 }
 

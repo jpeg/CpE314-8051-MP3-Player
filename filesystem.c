@@ -8,7 +8,6 @@
 
 uint8 xdata fs_sdBuffer1[512];
 uint8 xdata fs_sdBuffer2[512];
-static uint8 xdata* fs_buffer;
 
 enum FATtype { FAT16 = 1, FAT32 = 2 };
 static uint8 idata fs_FAToffset;
@@ -21,6 +20,7 @@ static uint32 idata fs_FATsize;
 // Define extern variables
 uint32 idata fs_FATfirstDataSector;
 uint32 idata fs_FATsectorsPerCluster;
+uint8 xdata* fs_buffer;
 
 void fs_init()
 {
@@ -40,7 +40,7 @@ void fs_init()
       fs_FATrelativeSectors = read32(0x01C6, fs_buffer);
     //uart_print("Boot Sector ", 12);
     //uart_hex32(fs_FATrelativeSectors);
-    //uart_print("\n\r", 2);
+    //uart_newline();
   }
   
   // Read boot sector
@@ -62,7 +62,7 @@ void fs_init()
       fs_FATsize = read16(0x0016, fs_buffer);
       //uart_print("FAT16", 5);
     }
-    //uart_print("\n\r", 2);
+    //uart_newline();
     
     fs_FATreservedSectorCount = read16(0x000E, fs_buffer);
     rootEntCnt = read16(0x0011, fs_buffer);
@@ -89,10 +89,10 @@ void fs_init()
     redLED = 0;
     /*uart_print("FAT Error ", 15);
     uart_hex8(error);
-    uart_print("\n\r", 2);*/
+    uart_newline();*/
   }
   
-  //uart_print("\n\r", 2);
+  //uart_newline();
 }
 
 
@@ -142,13 +142,14 @@ uint32 fs_findMP3(const uint32 startCluster)
         if(byte == 0xE0)
           continue;
         
+        
         if(read8(relativeEntry + 11, fs_buffer) & 0x20)
         {
           if(read8(relativeEntry + 8, fs_buffer) == 'M') //close enough
           {
-            entryCluster = read16(0x1A, fs_buffer);
+            entryCluster = read16(relativeEntry + 0x1A, fs_buffer);
             if(fs_FAToffset == FAT32)
-              entryCluster |= read16(0x14, fs_buffer) << 8;
+              entryCluster |= read16(relativeEntry + 0x14, fs_buffer) << 8;
             return entryCluster;
           }
         }
@@ -172,9 +173,10 @@ uint32 fs_findMP3(const uint32 startCluster)
 void fs_loadSector(uint32 cluster, uint8 relativeSector)
 {
   bit notDone = 1;
-  
+  uint32 temp = relativeSector; //this is to resolve some 8051 bullshit where it can't add
+
   // Load sector
-  spi_sdcard_command(17, (cluster-2)*fs_FATsectorsPerCluster + relativeSector + fs_FATfirstDataSector);
+  spi_sdcard_command(17, (cluster-2)*fs_FATsectorsPerCluster + temp + fs_FATfirstDataSector);
   spi_sdcard_block(512, fs_buffer);
 }
 
@@ -184,11 +186,6 @@ void fs_setBuffer(bit buffer)
     fs_buffer = &fs_sdBuffer2;
   else
     fs_buffer = &fs_sdBuffer1;
-}
-
-uint8 xdata* fs_currentBuffer()
-{
-  return fs_buffer;
 }
 
 uint8 read8(uint16 offset, uint8 xdata* array)
@@ -204,7 +201,7 @@ uint16 read16(uint16 offset, uint8 xdata* array)
   ptr = ((uint8 idata*)&value) + 1;
   *ptr = array[offset];
   *(--ptr) = array[++offset];
-  
+   
   return value;
 }
 

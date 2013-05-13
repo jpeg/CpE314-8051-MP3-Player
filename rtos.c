@@ -47,7 +47,7 @@ void rtos_init(void)
   ET2 = 1;
   TR2 = 1;
   
-  //uart_init();
+  uart_init();
   spi_sdcard_init();
   fs_init();
   
@@ -118,13 +118,15 @@ void rtos_tick_ISR(void) interrupt 5 using 3
   static bit buf2 = 0;
   static bit cluster = 0;
   static bit currentBuf = 0;
-  static uint32 clusterNum = 0;
+  static uint32 clusterNum = 0UL;
   static uint8 relativeSector;
   static uint16 currentByte = 0;
   
+  extern uint8 xdata* fs_buffer;
+  
 	TF2 = 0;
   
-  if(clusterNum == 0) //temp
+  if(clusterNum == 0UL) //temp
     clusterNum = startCluster;
   
   switch(rtos_state)
@@ -133,7 +135,7 @@ void rtos_tick_ISR(void) interrupt 5 using 3
     fs_setBuffer(currentBuf);
     while(mp3_data_req && (buf1 || buf2))
     {
-      spi_mp3_data(1, fs_currentBuffer() + currentByte);
+      spi_mp3_data(1, fs_buffer + currentByte);
       currentByte++;
       if(currentByte == 512)
       {
@@ -185,6 +187,7 @@ void rtos_tick_ISR(void) interrupt 5 using 3
     
     fs_loadSector(clusterNum, relativeSector);
     relativeSector++;
+    uart_hex32(clusterNum);uart_hex32(relativeSector);uart_newline();
     
     rtos_state = RTOS_SEND_DATA;
     break;

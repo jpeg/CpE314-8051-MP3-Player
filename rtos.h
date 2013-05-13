@@ -11,7 +11,7 @@
 
 #include "main.h"
 #include "ports.h"
-//#include "uart.h"
+#include "uart.h"
 #include "spi_sdcard.h"
 #include "twi.h"
 #include "filesystem.h"
