@@ -126,8 +126,11 @@ void rtos_tick_ISR(void) interrupt 5 using 3
   
 	TF2 = 0;
   
-  if(clusterNum == 0UL) //temp
+  if(clusterNum == 0UL)
+  {
     clusterNum = startCluster;
+    cluster = 1;
+  }
   
   switch(rtos_state)
   {
@@ -161,7 +164,7 @@ void rtos_tick_ISR(void) interrupt 5 using 3
   case RTOS_CHECK_MEM:
     if(buf1 == 0 || buf2 == 0)
     {
-      if(relativeSector == 64 || cluster == 0)
+      if(relativeSector == 64)
       {
         rtos_state = RTOS_NEXT_CLUS;
         cluster = 0;
@@ -174,20 +177,22 @@ void rtos_tick_ISR(void) interrupt 5 using 3
     break;
   
   case RTOS_READ_SEC:
-    if(buf1 == 0)
+    if(buf1 == 0 || buf2 == 0)
     {
-      fs_setBuffer(0);
-      buf1 = 1;
+      if(buf1 == 0)
+      {
+        fs_setBuffer(0);
+        buf1 = 1;
+      }
+      else
+      {
+        fs_setBuffer(1);
+        buf2 = 1;
+      }
+      
+      fs_loadSector(clusterNum, relativeSector);
+      relativeSector++;
     }
-    else if(buf2 == 0)
-    {
-      fs_setBuffer(1);
-      buf2 = 1;
-    }
-    
-    fs_loadSector(clusterNum, relativeSector);
-    relativeSector++;
-    uart_hex32(clusterNum);uart_hex32(relativeSector);uart_newline();
     
     rtos_state = RTOS_SEND_DATA;
     break;

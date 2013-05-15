@@ -190,28 +190,45 @@ uint8 spi_sdcard_response(uint8 numBytes, uint8 idata* buffer)
 uint8 spi_sdcard_block(uint16 numBytes, uint8* buffer)
 {
   uint8 in;
-  uint16 i; 
+  uint16 i;
+  uint8 timeout_received;
   uint8 timeout;
   uint8 error = 0;
   
   amberLED = 0;
   
+  timeout_received = 0;
   do
   {
+    timeout = 0;
     SPDAT = 0xFF;
-    while((SPSTA & 0x80) != 0x80);
+    while((SPSTA & 0x80) != 0x80 && ++timeout != 255);
     in = SPDAT;
-  } while(in == 0xFF);
+    timeout_received++;
+    
+    if(timeout == 255)
+          error = 2;
+  } while(in == 0xFF && timeout_received != 255 && error == 0);
+  if(timeout_received == 255)
+    error = 2;
   
   if(in == 0x00)
   {
-    
+    timeout_received = 0;
     do
     {
+      timeout = 0;
       SPDAT = 0xFF;
-      while((SPSTA & 0x80) != 0x80);
+      while((SPSTA & 0x80) != 0x80 && ++timeout != 255);
       in = SPDAT;
-    } while(in == 0xFF);
+      timeout_received++;
+      
+      if(timeout == 255)
+          error = 2;
+    } while(in == 0xFF && timeout_received != 255 && error == 0);
+    if(timeout_received == 255)
+      error = 2;
+    
     
     if(in == 0xFE)
     {
@@ -230,6 +247,7 @@ uint8 spi_sdcard_block(uint16 numBytes, uint8* buffer)
       // Read checksum
       for(i=0; i<2; ++i)
       {
+        timeout = 0;
         SPDAT = 0xFF;
         while((SPSTA & 0x80) != 0x80 && ++timeout != 255);
         in = SPDAT;

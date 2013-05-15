@@ -98,16 +98,17 @@ void fs_init()
 
 uint32 fs_FATentry(const uint32 cluster)
 {
-  uint32 FATsectorNumber;
-  uint32 FATentryOffset;
+  uint32 idata FATsectorNumber;
+  uint32 idata FATentryOffset;
+  uint32 idata temp = fs_FATreservedSectorCount; //make 8051 do the math right
   
-  FATsectorNumber = fs_FATreservedSectorCount + (cluster << fs_FAToffset) / 512 + fs_FATrelativeSectors;
-  FATentryOffset = (cluster << fs_FAToffset) % 512;
-  
+  FATsectorNumber = temp + ((cluster << fs_FAToffset) / 512UL) + fs_FATrelativeSectors;
+  FATentryOffset = (cluster << fs_FAToffset) % 512UL;
+
   spi_sdcard_command(17, FATsectorNumber);
   spi_sdcard_block(512, fs_buffer);
-  
-  return read32(FATentryOffset, fs_buffer) & (fs_FAToffset == FAT32 ? 0xFFFF : 0x0FFFFFFF);
+
+  return read32(FATentryOffset, fs_buffer);// & (fs_FAToffset == FAT32 ? 0x0FFFFFFF : 0xFFFF);
 }
 
 bit fs_FATeof(const uint32 cluster)
@@ -172,12 +173,12 @@ uint32 fs_findMP3(const uint32 startCluster)
 
 void fs_loadSector(uint32 cluster, uint8 relativeSector)
 {
-  bit notDone = 1;
-  uint32 temp = relativeSector; //this is to resolve some 8051 bullshit where it can't add
+  uint8 idata error;
+  uint32 idata temp = relativeSector; //this is to resolve some 8051 bullshit where it can't add
 
   // Load sector
   spi_sdcard_command(17, (cluster-2)*fs_FATsectorsPerCluster + temp + fs_FATfirstDataSector);
-  spi_sdcard_block(512, fs_buffer);
+  error = spi_sdcard_block(512, fs_buffer);
 }
 
 void fs_setBuffer(bit buffer)
