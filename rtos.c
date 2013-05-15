@@ -119,7 +119,7 @@ void rtos_tick_ISR(void) interrupt 5 using 3
   static bit cluster = 0;
   static bit currentBuf = 0;
   static uint32 clusterNum = 0UL;
-  static uint8 relativeSector;
+  static uint8 relativeSector = 0;
   static uint16 currentByte = 0;
   
   extern uint8 xdata* fs_buffer;
@@ -157,7 +157,6 @@ void rtos_tick_ISR(void) interrupt 5 using 3
       redLED=~redLED;
       song = 1;
     }
-    yellowLED = ~yellowLED;
     rtos_state = RTOS_CHECK_MEM;
     break;
   

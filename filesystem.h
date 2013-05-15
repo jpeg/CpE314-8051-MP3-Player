@@ -9,7 +9,7 @@
 
 #include "main.h"
 #include "spi_sdcard.h"
-#include "uart.h"
+//#include "uart.h"
 
 // Declare extern variables
 extern uint32 idata fs_FATfirstDataSector;

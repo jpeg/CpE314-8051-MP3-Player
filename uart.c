@@ -27,7 +27,7 @@ void uart_print(uint8* string, uint8 length)
   uint8 i;
   uint8 value;
   
-  //yellowLED = 0;
+  yellowLED = 0;
   
   for(i=0; i<length; ++i)
   {
@@ -39,7 +39,7 @@ void uart_print(uint8* string, uint8 length)
     TI = 0;
   }
   
-  //yellowLED = 1;
+  yellowLED = 1;
 }
 
 void uart_newline()
